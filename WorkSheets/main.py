@@ -34,14 +34,15 @@ class App:
         hours_list = []
         for job in jobs:
             for item in jobs[job][2]["Timesheets"]:
-                if item["Date"] == self.get_current_date():
-                    if item["Check-out"] == '':
-                        b = '0'
-                    else:
-                        a = item["Check-in"].split(':')
-                        b = item["Check-out"].split(':')
-                        hours = (int(b[0]) + (int(b[1]) / 60)) - (int(a[0]) + (int(a[1]) / 60)) - 0.5
-                        hours_list.append(hours)
+                if item["Name"] == st.session_state['name']:
+                    if item["Date"] == self.get_current_date():
+                        if item["Check-out"] == '':
+                            b = '0'
+                        else:
+                            a = item["Check-in"].split(':')
+                            b = item["Check-out"].split(':')
+                            hours = (int(b[0]) + (int(b[1]) / 60)) - (int(a[0]) + (int(a[1]) / 60)) - 0.5
+                            hours_list.append(hours)
         total = 0
         for ele in range(0, len(hours_list)):
             total = total + hours_list[ele]
