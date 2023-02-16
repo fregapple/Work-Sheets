@@ -18,13 +18,13 @@ class App:
 
     def write_to_json(self, text):
         text = json.dumps(text, indent=4)
-        with open ('./worksheets/jobs.json', 'w') as outfile:
+        with open ('./jobs.json', 'w') as outfile:
             outfile.write(text)
 
 
     def read_json(self):
-        if Path('./worksheets/jobs.json').is_file():
-            with open('./worksheets/jobs.json', 'r') as openfile:
+        if Path('./jobs.json').is_file():
+            with open('./jobs.json', 'r') as openfile:
                 jobs = json.load(openfile)
         return jobs
 
@@ -38,7 +38,7 @@ class App:
 
 
     def auth_read(self):
-        with open('./WorkSheets/main.yaml') as file:
+        with open('./main.yaml') as file:
             config = yaml.load(file, Loader=yaml.FullLoader)
 
             authenticator = stauth.Authenticate(
