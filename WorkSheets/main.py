@@ -205,19 +205,19 @@ class App:
 
                                             with col0:
                                                 st.write('Name')
-                                                st.text_input('p', key=x, value=thing["Name"], label_visibility='collapsed')
+                                                st.text_input('p', key=x, value=thing["Name"], label_visibility='collapsed', disabled=True)
                                                 x += 1
                                             with col1:
                                                 st.write('Date')
-                                                st.text_input('p', key=x, value=thing["Date"], label_visibility='collapsed')
+                                                st.text_input('p', key=x, value=thing["Date"], label_visibility='collapsed', disabled=True)
                                                 x += 1
                                             with col2:
                                                 st.write('Check-in')
-                                                st.text_input('p', key=x, value=thing["Check-in"], label_visibility='collapsed')
+                                                st.text_input('p', key=x, value=thing["Check-in"], label_visibility='collapsed', disabled=True)
                                                 x += 1
                                             with col3:
                                                 st.write('Check-out')
-                                                st.text_input('p', key=x, value=thing["Check-out"], label_visibility='collapsed')
+                                                st.text_input('p', key=x, value=thing["Check-out"], label_visibility='collapsed', disabled=True)
                                             x += 1
                                         self.p += 1
 
