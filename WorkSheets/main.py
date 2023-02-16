@@ -38,16 +38,17 @@ class App:
 
 
     def auth_read(self):
-        with open('./main.yaml') as file:
-            config = yaml.load(file, Loader=yaml.FullLoader)
+        if Path('./main.yaml')is_file():
+            with open('./main.yaml') as file:
+                config = yaml.load(file, Loader=yaml.FullLoader)
 
-            authenticator = stauth.Authenticate(
-                config['credentials'],
-                config['cookie']['name'],
-                config['cookie']['key'],
-                config['cookie']['expiry_days'],
-                config['preauthorized']
-            )
+                authenticator = stauth.Authenticate(
+                    config['credentials'],
+                    config['cookie']['name'],
+                    config['cookie']['key'],
+                    config['cookie']['expiry_days'],
+                    config['preauthorized']
+                )
 
         return authenticator
 
