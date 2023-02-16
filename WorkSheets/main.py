@@ -38,7 +38,7 @@ class App:
 
 
     def auth_read(self):
-        with open('./main.yaml') as file:
+        with open('../main.yaml') as file:
             config = yaml.load(file, Loader=yaml.FullLoader)
 
             authenticator = stauth.Authenticate(
