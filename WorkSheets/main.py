@@ -3,7 +3,7 @@ import streamlit_authenticator as stauth
 import yaml, time, json
 from pathlib import Path
 from datetime import datetime
-
+import pandas as pd
 
 class App:
     
@@ -13,6 +13,7 @@ class App:
     body = ['Timesheet', 'Materials', 'Notes']
     item3 = None
     p = 0
+    total_hours = []
 
 
 
@@ -29,7 +30,30 @@ class App:
         return jobs
 
 
+    def get_total_hours(self, jobs):
+        hours_list = []
+        for job in jobs:
+            for item in jobs[job][2]["Timesheets"]:
+                if item["Date"] == self.get_current_date():
+                    if item["Check-out"] == '':
+                        b = '0'
+                    else:
+                        a = item["Check-in"].split(':')
+                        b = item["Check-out"].split(':')
+                        hours = (int(b[0]) + (int(b[1]) / 60)) - (int(a[0]) + (int(a[1]) / 60)) - 0.5
+                        hours_list.append(hours)
+        total = 0
+        for ele in range(0, len(hours_list)):
+            total = total + hours_list[ele]
 
+        if total > 8:
+            OT = total - 8
+            base = 8
+        else:
+            OT = 0
+            base = total
+
+        return OT, base
 
     def get_current_date(self):
         date = datetime.today()
@@ -72,12 +96,28 @@ class App:
             with st.sidebar:
                 authenticator.logout('Logout', 'main')
 
+            
+            st.title('JFJ Joinery')
             st.write(f'Welcome *{st.session_state["name"]}*')
-            st.title('JFJ Joinery Work Sheets')
+            c = st.container()
+            hours = self.get_total_hours(jobs)
+            tally = pd.DataFrame(data=[[self.get_current_date(), hours[1], hours[0]]], columns=["Date", "Hours Today","Overtime"])
+            with c:
+                col1, col2 = st.columns(2)
+                with col1:
+                    c.dataframe(tally, width=500)
+                with col2:
+                    c.button('End of Day')
             x = 0
             current, complete = st.tabs(['Current', 'Complete'])
 
-
+            font_ = """
+            <style>
+            button[data-baseweb="tab"] > div[data-testid="stMarkdownContainer"] > p {
+                font-size: 24px;
+            }
+            </style>
+            """
             with current:
                 for job in jobs:
                     if jobs[job][0] == "Current":
@@ -196,136 +236,22 @@ class App:
 
                                         
                                     st.experimental_rerun()
-                                
+
+                                listo = []
                                 for items, values in jobs[job][2].items():
-                                    for thing in values:
+                                    t = 0
+
+                                    try:
+                                        for thing in values:
+                                            new = [thing['Name'], thing['Date'], thing['Check-in'], thing['Check-out']]
+                                            listo.append(new)
                                         
-                                        with st.form(f'my_form{self.p}'):
-                                            col0, col1, col2, col3 = st.columns(4)
-
-                                            with col0:
-                                                st.write('Name')
-                                                st.text_input('p', key=x, value=thing["Name"], label_visibility='collapsed', disabled=True)
-                                                x += 1
-                                            with col1:
-                                                st.write('Date')
-                                                st.text_input('p', key=x, value=thing["Date"], label_visibility='collapsed', disabled=True)
-                                                x += 1
-                                            with col2:
-                                                st.write('Check-in')
-                                                st.text_input('p', key=x, value=thing["Check-in"], label_visibility='collapsed', disabled=True)
-                                                x += 1
-                                            with col3:
-                                                st.write('Check-out')
-                                                st.text_input('p', key=x, value=thing["Check-out"], label_visibility='collapsed', disabled=True)
-                                            x += 1
-                                        self.p += 1
-
-
-                                col0, col1, col2, col3 = st.columns(4)
-
-                                with col0:
-
-                                    try:
-                                        y=2
-                                        z=0
-
-                                        while jobs[job][z] == 'Current':
-
-                                            try: 
-                                                st.write('Name')
-                                                                                
-                                                for items, values in jobs[job][2].items():
-                                                    for thing in values:
-                                                        st.text_input('p', key=x, value=thing["Name"], label_visibility="collapsed", disabled=True)
-                                                        x += 1
-                                                        
-                                                z += 1
-
-                                            except:
-                                                z += 1
-
-
                                     except:
                                         pass
-
-                                with col1:
-
-
-                                    try:
-                                        y=2
-                                        z=0
-
-                                        while jobs[job][z] == 'Current':
-
-                                            try: 
-                                                st.write('Date')
-                                                                                
-                                                for items, values in jobs[job][2].items():
-                                                    for thing in values:
-                                                        st.text_input('p', key=x, value=thing["Date"], label_visibility="collapsed", disabled=True)
-                                                        x += 1
-                                                        
-                                                z += 1
-
-                                            except:
-                                                z += 1
-                                                
-
-                                    except:
-                                        pass
-                                    
-                                with col2:
-
-                                    try:
-                                        y=2
-                                        z=0
-
-                                        while jobs[job][z] == 'Current':
-
-                                            try: 
-                                                st.write('Start')
-                                                                                
-                                                for items, values in jobs[job][2].items():
-                                                    for thing in values:
-                                                        st.text_input('p', key=x, value=thing["Check-in"], label_visibility="collapsed", disabled=True)
-                                                        x += 1
-                                                        
-                                                z += 1
-
-                                            except:
-                                                z += 1
-                                                
-
-                                    except:
-                                        pass
-                                    
-
-                                with col3:
-
-                                    try:
-                                        y=2
-                                        z=0
-
-                                        while jobs[job][z] == 'Current':
-
-                                            try: 
-                                                st.write('End')
-                                                                                
-                                                for items, values in jobs[job][2].items():
-                                                    for thing in values:
-                                                        st.text_input('p', key=x, value=thing["Check-out"], label_visibility="collapsed", disabled=True)
-                                                        x += 1
-                                                        
-                                                z += 1
-
-                                            except:
-                                                z += 1
-                                                
-
-                                    except:
-                                        pass
-
+                                if listo != []:
+                                    df = pd.DataFrame(data=listo, columns=['Name', 'Date', 'Check-in', 'Check-out'])
+                                    st.dataframe(df, width=1000)
+                                
 
 
                             with n:
