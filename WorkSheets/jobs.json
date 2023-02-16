@@ -1,0 +1,82 @@
+{
+    "The Weekender": [
+        "Complete",
+        {
+            "Notes": {}
+        },
+        {
+            "Timesheets": []
+        },
+        {
+            "Materials": {}
+        }
+    ],
+    "Watkins St, Ocean Grove": [
+        "Current",
+        {
+            "Notes": {}
+        },
+        {
+            "Timesheets": [
+                {
+                    "Name": "Sam Smollen",
+                    "Date": "16/02/2023",
+                    "Check-in": "14:00:00",
+                    "Check-out": "14:00:00"
+                },
+                {
+                    "Name": "Sam Smollen",
+                    "Date": "16/02/2023",
+                    "Check-in": "14:00:00",
+                    "Check-out": "12:00:00"
+                },
+                {
+                    "Name": "Sam Smollen",
+                    "Date": "16/02/2022",
+                    "Check-in": "12:00:00",
+                    "Check-out": "13:00:00"
+                }
+            ]
+        },
+        {
+            "Materials": {}
+        }
+    ],
+    "Drysdale": [
+        "Current",
+        {
+            "Notes": {}
+        },
+        {
+            "Timesheets": [
+                {
+                    "Name": "Sam Smollen",
+                    "Date": "16/02/2023",
+                    "Check-in": "14:51:00",
+                    "Check-out": "14:52:00"
+                },
+                {
+                    "Name": "Sam Smollen",
+                    "Date": "16/02/2023",
+                    "Check-in": "14:52:00",
+                    "Check-out": "14:52:00"
+                }
+            ]
+        },
+        {
+            "Materials": {}
+        }
+    ],
+    "Clifton": [
+        "Current",
+        {
+            "Notes": {}
+        },
+        {
+            "Timesheets": []
+        },
+        {
+            "Materials": {}
+        }
+    ]
+}
