@@ -23,8 +23,8 @@ class App:
 
 
     def read_json(self):
-        if Path('./jobs.json').is_file():
-            with open('./jobs.json', 'r') as openfile:
+        if Path('./WorkSheets/jobs.json').is_file():
+            with open('./WorkSheets/jobs.json', 'r') as openfile:
                 jobs = json.load(openfile)
         return jobs
 
