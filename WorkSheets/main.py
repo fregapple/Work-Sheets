@@ -18,7 +18,7 @@ class App:
 
     def write_to_json(self, text):
         text = json.dumps(text, indent=4)
-        with open ('./jobs.json', 'w') as outfile:
+        with open ('./WorkSheets/jobs.json', 'w') as outfile:
             outfile.write(text)
 
 
