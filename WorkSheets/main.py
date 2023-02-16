@@ -38,7 +38,7 @@ class App:
 
 
     def auth_read(self):
-        if Path('./main.yaml')is_file():
+        if Path('./main.yaml').is_file():
             with open('./main.yaml') as file:
                 config = yaml.load(file, Loader=yaml.FullLoader)
 
