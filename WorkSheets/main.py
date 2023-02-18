@@ -510,24 +510,13 @@ class App:
 
                                             submitted = st.form_submit_button("Submit")
                                         
-                                        if submitted:
-                                            if jobs[job]["Materials"] == []:
-                                                if quantity == 0:
-                                                    pass
-                                                else:
-                                                    new = {
-                                                                "Material": f"{material}",
-                                                                "Quantity": quantity
-                                                            }
-
-                                                    jobs[job]["Materials"].append(new)
-                                                    self.write_to_json(jobs, job)
-                                                    
+                                        if submitted:                                                   
 
 
                                             item_list = []
                                             for items in jobs[job]["Materials"]:
                                                 if material in items["Material"]:
+                                                    print('asdfasfasdfasdfasdf')
                             
                                                     q = float(items["Quantity"])
                                                     
@@ -539,18 +528,19 @@ class App:
                                                     self.write_to_json(jobs, job)
                                                     
                                                 
-                                                elif material not in item_list:
-                                                    
+                                            if material not in item_list:
+                                                
 
-                                                    if quantity == 0:
-                                                        pass
-                                                    else:
-                                                        new = {
-                                                            "Material": f"{material}",
-                                                            "Quantity": quantity
-                                                        }
-                                                        jobs[job]["Materials"].append(new)
-                                                        self.write_to_json(jobs, job)
+                                                if quantity == 0:
+                                                    pass
+                                                else:
+                                                    
+                                                    new = {
+                                                        "Material": f"{material}",
+                                                        "Quantity": quantity
+                                                    }
+                                                    jobs[job]["Materials"].append(new)
+                                                    self.write_to_json(jobs, job)
                                             
                                                         
           
