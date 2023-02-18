@@ -1,23 +1,4 @@
 {
-    "The Weekender": [
-        "Complete",
-        {
-            "Notes": {}
-        },
-        {
-            "Timesheets": [
-                {
-                    "Name": "Sam Smollen",
-                    "Date": "18/02/2023",
-                    "Check-in": "23:45",
-                    "Check-out": "23:45"
-                }
-            ]
-        },
-        {
-            "Materials": []
-        }
-    ],
     "Watkins St, Ocean Grove": [
         "Current",
         {
@@ -28,10 +9,106 @@
         {
             "Timesheets": [
                 {
+                    "Check-in": "07:00",
                     "Name": "Sam Smollen",
                     "Date": "18/02/2023",
-                    "Check-in": "07:00",
                     "Check-out": "12:00"
+                },
+                {
+                    "Name": "Sam Smollen",
+                    "Date": "18/02/2023",
+                    "Check-out": "23:45",
+                    "Check-in": "23:45"
+                },
+                {
+                    "Check-out": "23:45",
+                    "Check-in": "23:45",
+                    "Date": "18/02/2023",
+                    "Name": "Sam Smollen"
+                },
+                {
+                    "Check-in": "23:45",
+                    "Date": "18/02/2023",
+                    "Check-out": "23:45",
+                    "Name": "Sam Smollen"
+                },
+                {
+                    "Name": "Sam Smollen",
+                    "Date": "18/02/2023",
+                    "Check-out": "23:45",
+                    "Check-in": "23:45"
+                },
+                {
+                    "Check-in": "23:45",
+                    "Name": "Sam Smollen",
+                    "Date": "18/02/2023",
+                    "Check-out": "23:45"
+                },
+                {
+                    "Check-in": "23:45",
+                    "Check-out": "11:00",
+                    "Date": "18/02/2023",
+                    "Name": "Sam Smollen"
+                },
+                {
+                    "Check-in": "23:45",
+                    "Name": "Sam Smollen",
+                    "Date": "18/02/2023",
+                    "Check-out": "23:45"
+                },
+                {
+                    "Date": "18/02/2023",
+                    "Name": "Sam Smollen",
+                    "Check-in": "23:45",
+                    "Check-out": "23:45"
+                },
+                {
+                    "Name": "Sam Smollen",
+                    "Check-in": "23:45",
+                    "Date": "18/02/2023",
+                    "Check-out": "23:45"
+                },
+                {
+                    "Check-out": "23:45",
+                    "Check-in": "23:45",
+                    "Date": "18/02/2023",
+                    "Name": "Sam Smollen"
+                },
+                {
+                    "Name": "Sam Smollen",
+                    "Date": "18/02/2023",
+                    "Check-in": "23:45",
+                    "Check-out": "23:45"
+                },
+                {
+                    "Check-out": "23:45",
+                    "Name": "Sam Smollen",
+                    "Check-in": "23:45",
+                    "Date": "18/02/2023"
+                },
+                {
+                    "Check-out": "23:45",
+                    "Date": "18/02/2023",
+                    "Name": "Sam Smollen",
+                    "Check-in": "23:45"
+                },
+                {
+                    "Name": "Sam Smollen",
+                    "Date": "18/02/2023",
+                    "Check-out": "23:45",
+                    "Check-in": "23:45"
+                },
+                {
+                    "Name": "Sam Smollen",
+                    "Date": "18/02/2023",
+                    "Check-out": "23:45",
+                    "Check-in": "23:45"
+                },
+                {
+                    "Name": "Sam Smollen",
+                    "Check-in": "23:45",
+                    "Check-out": "",
+                    "Date": "18/02/2023"
                 }
             ]
         },
@@ -54,7 +131,26 @@
             "Notes": {}
         },
         {
-            "Timesheets": []
+            "Timesheets": [
+                {
+                    "Name": "Sam Smollen",
+                    "Check-in": "23:45",
+                    "Date": "18/02/2023",
+                    "Check-out": "23:45"
+                },
+                {
+                    "Check-in": "23:45",
+                    "Name": "Sam Smollen",
+                    "Date": "18/02/2023",
+                    "Check-out": "23:45"
+                },
+                {
+                    "Name": "Sam Smollen",
+                    "Check-out": "23:45",
+                    "Date": "18/02/2023",
+                    "Check-in": "23:45"
+                }
+            ]
         },
         {
             "Materials": [
@@ -67,26 +163,14 @@
                     "Quantity": 1.0
                 },
                 {
-                    "Material": "Swift Drawer D=500, H=172mm",
-                    "Quantity": 4.0
+                    "Quantity": 4.0,
+                    "Material": "Swift Drawer D=500, H=172mm"
                 },
                 {
                     "Material": "Hinges",
                     "Quantity": 3.0
                 }
             ]
-        }
-    ],
-    "Clifton": [
-        "Current",
-        {
-            "Notes": {}
-        },
-        {
-            "Timesheets": []
-        },
-        {
-            "Materials": []
         }
     ],
     "Other": [
@@ -96,47 +180,127 @@
         {
             "Employee_Variables": {
                 "Sam Smollen": {
-                    "Check-in": "False",
                     "Start": "",
-                    "End": "",
-                    "Form": "False",
-                    "Break": "False",
                     "Total_Hours": [
                         {
-                            "Date": "18/02/2023",
-                            "Check-in": "04:30",
-                            "Check-out": "16:30",
                             "Break": "Yes",
                             "Amend": "0.0",
-                            "Description": ""
+                            "Check-in": "04:30",
+                            "Description": "",
+                            "Check-out": "16:30",
+                            "Date": "18/02/2023"
                         },
                         {
                             "Date": "18/02/2023",
-                            "Check-in": "14:30",
-                            "Check-out": "14:30",
-                            "Break": "No",
+                            "Description": "Accidently checked in",
                             "Amend": "0.0",
-                            "Description": "Accidently checked in"
+                            "Check-in": "14:30",
+                            "Break": "No",
+                            "Check-out": "14:30"
                         },
                         {
-                            "Date": "18/02/2023",
-                            "Check-in": "14:30",
-                            "Check-out": "17:30",
-                            "Break": "No",
                             "Amend": "3.0",
-                            "Description": "Test"
+                            "Check-out": "17:30",
+                            "Description": "Test",
+                            "Break": "No",
+                            "Date": "18/02/2023",
+                            "Check-in": "14:30"
                         },
                         {
+                            "Check-out": "17:30",
                             "Date": "18/02/2023",
                             "Check-in": "14:30",
-                            "Check-out": "17:30",
-                            "Break": "No",
                             "Amend": "3.0",
+                            "Break": "No",
                             "Description": "Worked on Timesheets App\n"
+                        },
+                        {
+                            "Check-in": "15:30",
+                            "Amend": "0.0",
+                            "Break": "No",
+                            "Description": "",
+                            "Check-out": "15:45",
+                            "Date": "18/02/2023"
+                        },
+                        {
+                            "Date": "18/02/2023",
+                            "Description": "",
+                            "Amend": "0.0",
+                            "Check-out": "15:45",
+                            "Check-in": "15:45",
+                            "Break": "No"
+                        },
+                        {
+                            "Amend": "0.0",
+                            "Description": "",
+                            "Check-out": "16:00",
+                            "Date": "18/02/2023",
+                            "Check-in": "16:00",
+                            "Break": "No"
                         }
-                    ]
+                    ],
+                    "End": "",
+                    "Form": "False",
+                    "Check-in": "False",
+                    "Break": "False"
                 }
             }
+        }
+    ],
+    "The Weekender": [
+        "Complete",
+        {
+            "Notes": {}
+        },
+        {
+            "Timesheets": [
+                {
+                    "Check-in": "23:45",
+                    "Date": "18/02/2023",
+                    "Name": "Sam Smollen",
+                    "Check-out": "23:45"
+                }
+            ]
+        },
+        {
+            "Materials": []
+        }
+    ],
+    "Clifton": [
+        "Current",
+        {
+            "Notes": {}
+        },
+        {
+            "Timesheets": [
+                {
+                    "Check-in": "23:45",
+                    "Name": "Sam Smollen",
+                    "Date": "18/02/2023",
+                    "Check-out": "23:45"
+                },
+                {
+                    "Check-out": "23:45",
+                    "Date": "18/02/2023",
+                    "Name": "Sam Smollen",
+                    "Check-in": "23:45"
+                },
+                {
+                    "Date": "18/02/2023",
+                    "Check-out": "23:45",
+                    "Name": "Sam Smollen",
+                    "Check-in": "23:45"
+                },
+                {
+                    "Check-in": "23:45",
+                    "Check-out": "",
+                    "Name": "Sam Smollen",
+                    "Date": "18/02/2023"
+                }
+            ]
+        },
+        {
+            "Materials": []
         }
     ]
 }
