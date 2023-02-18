@@ -562,8 +562,8 @@ class App:
                                             df = pd.DataFrame(data=array, columns=["Material", "Quantity"])
                                             hide = """
                                             <style>
-                                            thead tr th:first-child {display:none}
-                                            tbody th {display:none}
+                                            .row_heading.level0 {display:none}
+                                            .blank {display:none}
                                             </style>"""
                                             st.markdown(hide, unsafe_allow_html=True)
                                             st.dataframe(df, width=500)
