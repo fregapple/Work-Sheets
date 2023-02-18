@@ -1,6 +1,6 @@
 import streamlit as st
 import streamlit_authenticator as stauth
-import yaml, time, json
+import yaml, json
 from pathlib import Path
 from datetime import datetime
 import pandas as pd
