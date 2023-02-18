@@ -478,7 +478,7 @@ class App:
                                         if submitted:
                                             now = datetime.now()
                                             dt = now.strftime("%d/%m/%Y - %H:%M:%S")
-                                            jobs[job]["Notes"][f'{st.session_state["name"]} - {dt}'] = text 
+                                            jobs[job]["Notes"][f'{dt} - {st.session_state["name"]}'] = text 
                                             self.write_to_json(jobs, job)
                                             x += 1
 
@@ -625,7 +625,7 @@ class App:
                                         if submitted:
                                             now = datetime.now()
                                             dt = now.strftime("%d/%m/%Y - %H:%M:%S")
-                                            jobs[job]["Notes"][f'{st.session_state["name"]} - {dt}'] = text 
+                                            jobs[job]["Notes"][f'{dt} - {st.session_state["name"]}'] = text 
                                             self.write_to_json(jobs, job)
                                             x += 1
 
