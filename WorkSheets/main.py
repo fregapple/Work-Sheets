@@ -6,8 +6,8 @@ from datetime import datetime
 import pandas as pd
 from pytz import timezone
 import time as ttime
-import google.cloud.firestore as firestore
-
+from google.cloud import firestore
+from google.oauth2 import service_account
 
 
 
