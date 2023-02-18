@@ -5,35 +5,47 @@
             "Notes": {}
         },
         {
-            "Timesheets": []
+            "Timesheets": [
+                {
+                    "Name": "Sam Smollen",
+                    "Date": "18/02/2023",
+                    "Check-in": "23:45",
+                    "Check-out": "23:45"
+                }
+            ]
         },
         {
-            "Materials": {}
+            "Materials": []
         }
     ],
     "Watkins St, Ocean Grove": [
         "Current",
         {
-            "Notes": {}
+            "Notes": {
+                "Sam Smollen - 18/02/2023 - 14:31:35": "asdfasdf"
+            }
         },
         {
             "Timesheets": [
                 {
                     "Name": "Sam Smollen",
-                    "Date": "16/02/2023",
-                    "Check-in": "07:30:00",
-                    "Check-out": "16:30:00"
-                },
-                {
-                    "Name": "Dongo the Bongo",
-                    "Date": "16/02/2023",
-                    "Check-in": "07:30:00",
-                    "Check-out": "17:31:00"
+                    "Date": "18/02/2023",
+                    "Check-in": "07:00",
+                    "Check-out": "12:00"
                 }
             ]
         },
         {
-            "Materials": {}
+            "Materials": [
+                {
+                    "Material": "Whiteboard (Full Sheet)",
+                    "Quantity": 2.0
+                },
+                {
+                    "Material": "Swift Drawer D=500, H=172mm",
+                    "Quantity": 2.0
+                }
+            ]
         }
     ],
     "Drysdale": [
@@ -45,7 +57,24 @@
             "Timesheets": []
         },
         {
-            "Materials": {}
+            "Materials": [
+                {
+                    "Material": "Whiteboard (Half Sheet)",
+                    "Quantity": 1.0
+                },
+                {
+                    "Material": "Whiteboard (Full Sheet)",
+                    "Quantity": 1.0
+                },
+                {
+                    "Material": "Swift Drawer D=500, H=172mm",
+                    "Quantity": 4.0
+                },
+                {
+                    "Material": "Hinges",
+                    "Quantity": 3.0
+                }
+            ]
         }
     ],
     "Clifton": [
@@ -57,7 +86,57 @@
             "Timesheets": []
         },
         {
-            "Materials": {}
+            "Materials": []
+        }
+    ],
+    "Other": [
+        {
+            "Shed_Hours": []
+        },
+        {
+            "Employee_Variables": {
+                "Sam Smollen": {
+                    "Check-in": "False",
+                    "Start": "",
+                    "End": "",
+                    "Form": "False",
+                    "Break": "False",
+                    "Total_Hours": [
+                        {
+                            "Date": "18/02/2023",
+                            "Check-in": "04:30",
+                            "Check-out": "16:30",
+                            "Break": "Yes",
+                            "Amend": "0.0",
+                            "Description": ""
+                        },
+                        {
+                            "Date": "18/02/2023",
+                            "Check-in": "14:30",
+                            "Check-out": "14:30",
+                            "Break": "No",
+                            "Amend": "0.0",
+                            "Description": "Accidently checked in"
+                        },
+                        {
+                            "Date": "18/02/2023",
+                            "Check-in": "14:30",
+                            "Check-out": "17:30",
+                            "Break": "No",
+                            "Amend": "3.0",
+                            "Description": "Test"
+                        },
+                        {
+                            "Date": "18/02/2023",
+                            "Check-in": "14:30",
+                            "Check-out": "17:30",
+                            "Break": "No",
+                            "Amend": "3.0",
+                            "Description": "Worked on Timesheets App\n"
+                        }
+                    ]
+                }
+            }
         }
     ]
 }
