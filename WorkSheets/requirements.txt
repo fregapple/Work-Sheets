@@ -2,5 +2,4 @@ streamlit_authenticator
 pyyaml
 datetime
 pytz
-google
-google.cloud
+google-cloud-firestore
