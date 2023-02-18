@@ -18,6 +18,7 @@ class App:
 
     st.set_page_config(layout='wide')
     key_dict = json.loads(st.secrets["textkey"])
+    print('test')
     creds = service_account.Credentials.from_service_account_info(key_dict)
     db = firestore.Client(credentials=creds, project="WorkSheets")
     body = ['Timesheet', 'Materials', 'Notes']
