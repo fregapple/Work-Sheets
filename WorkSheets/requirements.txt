@@ -6,5 +6,4 @@ google-cloud-firestore
 google-auth-oauthlib
 pandas
 pathlib
-json
 time
