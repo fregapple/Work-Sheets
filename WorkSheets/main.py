@@ -54,13 +54,6 @@ class App:
         doc_ref.set(text[job])
 
 
-
-    def read_json(self):
-        if Path('./WorkSheets/jobs.json').is_file():
-            with open('./WorkSheets/jobs.json', 'r') as openfile:
-                jobs = json.load(openfile)
-        return jobs
-
     
     def time_list(self):
         times = [
@@ -347,190 +340,168 @@ class App:
                     
                 
 
-            try:
-                st.title('JFJ Joinery')
-                st.write(f'Welcome *{st.session_state["name"]}*')
-                c = st.container()
-                hours = self.update_hours_tally(jobs, 1)
-                tally = pd.DataFrame(data=[[self.get_current_date(), hours[1], hours[0]]], columns=["Date", "Hours Today","Overtime"])
-                with c:
-                    col1, col2 = st.columns(2)
-                    with col1:
-                        c.dataframe(tally, width=500)
-                    with col2:
-                        check_in = jobs["Other"]["Employee_Variables"][f"{st.session_state['name']}"]
-                        if check_in["Check-in"] == "False":
-                            dbut = c.button('Start Day')
-                            if dbut:
-                                check_in["Check-in"] = "True"
-                                check_in["Start"] = self.round_time(self.get_current_time())
-                                self.write_to_json(jobs, "Other")
-                                st.experimental_rerun()
+            
+            st.title('JFJ Joinery')
+            st.write(f'Welcome *{st.session_state["name"]}*')
+            c = st.container()
+            hours = self.update_hours_tally(jobs, 1)
+            tally = pd.DataFrame(data=[[self.get_current_date(), hours[1], hours[0]]], columns=["Date", "Hours Today","Overtime"])
+            with c:
+                col1, col2 = st.columns(2)
+                with col1:
+                    c.dataframe(tally, width=500)
+                with col2:
+                    check_in = jobs["Other"]["Employee_Variables"][f"{st.session_state['name']}"]
+                    if check_in["Check-in"] == "False":
+                        dbut = c.button('Start Day')
+                        if dbut:
+                            check_in["Check-in"] = "True"
+                            check_in["Start"] = self.round_time(self.get_current_time())
+                            self.write_to_json(jobs, "Other")
+                            
+                            st.experimental_rerun()
 
-                        elif check_in["Check-in"] == "True":
-                            dbut = c.button('End Day')
-                            if dbut:
-                                self.new_form = True
-                                time = self.get_current_time()
-                                check_in["End"] = self.round_time(self.get_current_time())
-                                check_in["Form"] = "Form1"
-                        
-                                self.write_to_json(jobs, "Other")
-                                st.experimental_rerun()
-                new_form = jobs["Other"]["Employee_Variables"][f"{st.session_state['name']}"]
-                if new_form["Form"] == "Form1":
+                    elif check_in["Check-in"] == "True":
+                        dbut = c.button('End Day')
+                        if dbut:
+                            self.new_form = True
+                            time = self.get_current_time()
+                            check_in["End"] = self.round_time(self.get_current_time())
+                            check_in["Form"] = "Form1"
                     
-                    with st.form("EOD", clear_on_submit=False):
+                            self.write_to_json(jobs, "Other")
+                            
+                            st.experimental_rerun()
+            new_form = jobs["Other"]["Employee_Variables"][f"{st.session_state['name']}"]
+            if new_form["Form"] == "Form1":
+                
+                with st.form("EOD", clear_on_submit=False):
+                    
+                    hours = self.update_hours_tally(jobs, 2)
+                    total = hours[0] + hours[1]
+                    st.write(f'You have worked {hours[1]} hours this shift!')
+                    st.write("Did you take a Lunch Break today?")
+                    submitted = st.form_submit_button('Yes')
+                    submitted2 = st.form_submit_button('No')
+                    
+                    if submitted:
+                        new_form["Form"] = "Form2"
+                        new_form["Break"] = "Yes"
+
+                        self.write_to_json(jobs, "Other")
                         
-                        hours = self.update_hours_tally(jobs, 2)
-                        total = hours[0] + hours[1]
-                        st.write(f'You have worked {hours[1]} hours this shift!')
-                        st.write("Did you take a Lunch Break today?")
-                        submitted = st.form_submit_button('Yes')
-                        submitted2 = st.form_submit_button('No')
+                        st.experimental_rerun()
+
+                    elif submitted2:
+                        new_form["Form"] = "Form2"
+                        new_form["Break"] = "No"
+
+                        self.write_to_json(jobs, "Other")
                         
-                        if submitted:
-                            new_form["Form"] = "Form2"
-                            new_form["Break"] = "Yes"
-
-                            self.write_to_json(jobs, "Other")
-                            st.experimental_rerun()
-
-                        elif submitted2:
-                            new_form["Form"] = "Form2"
-                            new_form["Break"] = "No"
-
-                            self.write_to_json(jobs, "Other")
-                            st.experimental_rerun()
+                        st.experimental_rerun()
 
 
-                elif new_form["Form"] == "Form2":
+            elif new_form["Form"] == "Form2":
 
-                    with st.form("Adjust Hours"):
-                        st.write("You can adjust hours here. Otherwise, please.")
-                        st.write("provide a short decscription and click Finish to complete.")
-                        submitted = st.form_submit_button("Finish")
-                        num = st.number_input(label='p', label_visibility='collapsed', key='num')
-                        desc = st.text_area(label='p', label_visibility='collapsed', key='desc')
-
-                            
-                            
-
-                        if submitted:
-                            
-                            value = self.convert_to_int(new_form["End"])
-                            
-                            value = value + num
-                            
-                            value = self.convert_to_time(value)
-                            
-
-
-                            new = {"Date": f"{self.get_current_date()}",
-                                "Check-in": f"{new_form['Start']}",
-                                "Check-out": f"{value}",
-                                "Break": f"{new_form['Break']}",
-                                "Amend": f"{num}",
-                                "Description": f"{desc}"}
-
-                            new_form["Total_Hours"].append(new)
-
-                            new_form["Start"] = ''
-                            new_form["End"] = ''
-                            new_form['Break'] = 'False'                                                   
-                            new_form["Check-in"] = 'False'
-                            new_form["Form"] = 'False'
-                            self.write_to_json(jobs, "Other")
-                            st.experimental_rerun()
-                            
+                with st.form("Adjust Hours"):
+                    st.write("You can adjust hours here. Otherwise, please.")
+                    st.write("provide a short decscription and click Finish to complete.")
+                    submitted = st.form_submit_button("Finish")
+                    num = st.number_input(label='p', label_visibility='collapsed', key='num')
+                    desc = st.text_area(label='p', label_visibility='collapsed', key='desc')
 
                         
+                        
 
-                            
-                else:
-                    pass
-                x = 0
-                current, complete = st.tabs(['Current', 'Complete'])
-
-
-                with current:
-                    for job in jobs:
-                        if job == 'Other':
-                            pass
-                        if job == 'config':
-                            pass
-                        else:
-                            
-                            try:
-                                if jobs[job]["Status"] == "Current":
-                                    with st.expander(job):
-                                        t, m, n = st.tabs(self.body)
-
-                                        with t:
-
-                                            with st.form(f"My Form {x}", clear_on_submit=False):
-                                                col1, col2, col3, col0 = st.columns(4)
-
-                                                with col1:
-
-                                                    item1 = st.text_input('Name', key=x, value=st.session_state["name"], disabled=True)
-                                                    
-                                                    x += 1
-
-                                                with col2:
-                                                    item2 = st.date_input('Date', key=x)
-                                                    x += 1
-
-                                                with col3:
-                                                    
-                                                    item3 = st.selectbox('Time', options=self.time_list(), key=x)
-                                                    x += 1
+                    if submitted:
+                        
+                        value = self.convert_to_int(new_form["End"])
+                        
+                        value = value + num
+                        
+                        value = self.convert_to_time(value)
+                        
 
 
-                                                with col0:
-                                                    pass
+                        new = {"Date": f"{self.get_current_date()}",
+                            "Check-in": f"{new_form['Start']}",
+                            "Check-out": f"{value}",
+                            "Break": f"{new_form['Break']}",
+                            "Amend": f"{num}",
+                            "Description": f"{desc}"}
 
-                                                submitted = st.form_submit_button('Submit')
+                        new_form["Total_Hours"].append(new)
+
+                        new_form["Start"] = ''
+                        new_form["End"] = ''
+                        new_form['Break'] = 'False'                                                   
+                        new_form["Check-in"] = 'False'
+                        new_form["Form"] = 'False'
+                        self.write_to_json(jobs, "Other")
+                        
+                        st.experimental_rerun()
+                        
+
+                    
+
+                        
+            else:
+                pass
+            x = 0
+            current, complete = st.tabs(['Current', 'Complete'])
 
 
+            with current:
+                for job in jobs:
+                    if job == 'Other':
+                        pass
+                    if job == 'config':
+                        pass
+                    else:
+                        
+                        try:
+                            if jobs[job]["Status"] == "Current":
+                                with st.expander(job):
+                                    t, m, n = st.tabs(self.body)
 
-                                            if submitted:
-                                                y = 0
+                                    with t:
+
+                                        with st.form(f"My Form {x}", clear_on_submit=False):
+                                            col1, col2, col3, col0 = st.columns(4)
+
+                                            with col1:
+
+                                                item1 = st.text_input('Name', key=x, value=st.session_state["name"], disabled=True)
                                                 
-                                                
-                                                test = True
+                                                x += 1
 
-                                                while test:
+                                            with col2:
+                                                item2 = st.date_input('Date', key=x)
+                                                x += 1
 
-                                                    try:
-                                                        if jobs[job]["Timesheets"] == []:
-                                                            new = {"Name": f"{st.session_state['name']}",
-                                                                "Date": f"{self.get_current_date()}",
-                                                                "Check-in": f"{str(item3)}",
-                                                                "Check-out": ""}
-                                                            jobs[job]["Timesheets"].append(new) 
-                                                            self.write_to_json(jobs, job)
-                                                            test = False
+                                            with col3:
                                                 
-                                                        elif jobs[job]["Timesheets"][y]["Name"] == f"{st.session_state['name']}":
-                                                            if jobs[job]["Timesheets"][y]["Date"] == f'{self.get_current_date()}':
-                                                                if jobs[job]["Timesheets"][y]["Check-in"] == '':
-                                                                    jobs[job]["Timesheets"][y]["Check-in"] = str(item3)
-                                                                    self.write_to_json(jobs, job)
-                                                                    test = False
-                                                                elif jobs[job]["Timesheets"][y]["Check-out"] == '':
-                                                                    jobs[job]["Timesheets"][y]["Check-out"] = str(item3)
-                                                                    self.write_to_json(jobs, job)
-                                                                    
-                                                                    print('test')
-                                                                    test = False
-                                                                else: 
-                                                                    y += 1
-                                                                
-                                                                
-                                                        else:
-                                                            y += 1
-                                                    except:
+                                                item3 = st.selectbox('Time', options=self.time_list(), key=x)
+                                                x += 1
+
+
+                                            with col0:
+                                                pass
+
+                                            submitted = st.form_submit_button('Submit')
+
+
+
+                                        if submitted:
+                                            y = 0
+                                            
+                                            
+                                            test = True
+
+                                            while test:
+
+                                                try:
+                                                    if jobs[job]["Timesheets"] == []:
                                                         new = {"Name": f"{st.session_state['name']}",
                                                             "Date": f"{self.get_current_date()}",
                                                             "Check-in": f"{str(item3)}",
@@ -538,139 +509,38 @@ class App:
                                                         jobs[job]["Timesheets"].append(new) 
                                                         self.write_to_json(jobs, job)
                                                         test = False
-                                                        print('test2')
-
-                                                    
-                                                
-
-                                            listo = []
-                                            for items, values in jobs[job].items():
-                                                t = 0
-
-                                                try:
-                                                    for thing in values:
-                                                        new = [thing['Name'], thing['Date'], thing['Check-in'], thing['Check-out']]
-                                                        listo.append(new)
-                                                    
-                                                except:
-                                                    pass
-                                            if listo != []:
-                                                df = pd.DataFrame(data=listo, columns=['Name', 'Date', 'Check-in', 'Check-out'])
-                                                st.dataframe(df, width=1000)
                                             
-
-
-                                        with n:
-                                                    
-                                            with st.form(f'my_form{x}', clear_on_submit=True):
-                                                text = st.text_area(label='Test', label_visibility='collapsed')
-                                                submitted = st.form_submit_button("Submit")
-                                                x += 1
-
-                                            if submitted:
-                                                now = datetime.now()
-                                                dt = now.strftime("%d/%m/%Y - %H:%M:%S")
-                                                jobs[job]["Notes"][f'{dt} - {st.session_state["name"]}'] = text 
-                                                self.write_to_json(jobs, job)
-                                                x += 1
-
-                                            notes = []
-                                            for keys, values in jobs[job]["Notes"].items():
-                                                notes.append(keys)
-                                            
-                                            notes.sort()
-                                            notes.reverse()
-
-                                            for note in notes:
-
-                                                st.text_area(label=note, key=x, value=jobs[job]["Notes"][note], disabled=True)
-                                                x += 1
-                                                
-
-                                        with m:
-        
-                                            array = []
-                                            
-                                            with st.form(f'My_form{x}'):
-                                                material = st.selectbox('Material', options=self.material_list(), key=x)
-                                                x += 1
-                                                quantity = st.number_input('Quantity', key=x)
-                                                x += 1
-
-                                                submitted = st.form_submit_button("Submit")
-                                            
-                                            if submitted:                                                   
-
-
-                                                item_list = []
-                                                for items in jobs[job]["Materials"]:
-                                                    if material in items["Material"]:
-                                                        print('asdfasfasdfasdfasdf')
-                                
-                                                        q = float(items["Quantity"])
-                                                        
-                                                        q += quantity
-                                                        
-                                                        items["Quantity"] = q
-                                                        item_list.append((items["Material"]))
-                                                        
-                                                        self.write_to_json(jobs, job)
-                                                        
-                                                    
-                                                if material not in item_list:
-                                                    
-
-                                                    if quantity == 0:
-                                                        pass
-                                                    else:
-                                                        
-                                                        new = {
-                                                            "Material": f"{material}",
-                                                            "Quantity": quantity
-                                                        }
-                                                        jobs[job]["Materials"].append(new)
-                                                        self.write_to_json(jobs, job)
-                                                
+                                                    elif jobs[job]["Timesheets"][y]["Name"] == f"{st.session_state['name']}":
+                                                        if jobs[job]["Timesheets"][y]["Date"] == f'{self.get_current_date()}':
+                                                            if jobs[job]["Timesheets"][y]["Check-in"] == '':
+                                                                jobs[job]["Timesheets"][y]["Check-in"] = str(item3)
+                                                                self.write_to_json(jobs, job)
+                                                                test = False
+                                                            elif jobs[job]["Timesheets"][y]["Check-out"] == '':
+                                                                jobs[job]["Timesheets"][y]["Check-out"] = str(item3)
+                                                                self.write_to_json(jobs, job)
+                                                                
+                                                                print('test')
+                                                                test = False
+                                                            else: 
+                                                                y += 1
                                                             
-            
-                                            for selection in jobs[job]["Materials"]:
+                                                            
+                                                    else:
+                                                        y += 1
+                                                except:
+                                                    new = {"Name": f"{st.session_state['name']}",
+                                                        "Date": f"{self.get_current_date()}",
+                                                        "Check-in": f"{str(item3)}",
+                                                        "Check-out": ""}
+                                                    jobs[job]["Timesheets"].append(new) 
+                                                    self.write_to_json(jobs, job)
+                                                    test = False
+                                                    print('test2')
+
                                                 
-                                                
-                                                array.append([selection["Material"], selection["Quantity"]])
-                                                print(array)
+                                            
 
-                                                testu = False
-                                            if array != []:
-                                                df = pd.DataFrame(data=array, columns=["Material", "Quantity"])
-                                                hide = """
-                                                <style>
-                                                .row_heading.level0 {display:none}
-                                                .blank {display:none}
-                                                </style>"""
-                                                st.markdown(hide, unsafe_allow_html=True)
-                                                st.dataframe(df, width=500)
-
-
-
-                            except:
-                                pass
-
-
-
-
-                with complete:
-                    for job in jobs:
-
-                        if job == 'config':
-                            pass
-                        if job == 'Other':
-                            pass
-
-                        try:
-                            if jobs[job]["Status"] == "Complete":
-                                with st.expander(job):
-                                    t, p, n = st.tabs(self.body)
-                                    with t:
                                         listo = []
                                         for items, values in jobs[job].items():
                                             t = 0
@@ -685,45 +555,169 @@ class App:
                                         if listo != []:
                                             df = pd.DataFrame(data=listo, columns=['Name', 'Date', 'Check-in', 'Check-out'])
                                             st.dataframe(df, width=1000)
+                                        
+
+
                                     with n:
-                                                    
-                                            y = 1
-                                            z = 0
+                                                
+                                        with st.form(f'my_form{x}', clear_on_submit=True):
+                                            text = st.text_area(label='Test', label_visibility='collapsed')
+                                            submitted = st.form_submit_button("Submit")
+                                            x += 1
 
+                                        if submitted:
+                                            now = datetime.now()
+                                            dt = now.strftime("%d/%m/%Y - %H:%M:%S")
+                                            jobs[job]["Notes"][f'{dt} - {st.session_state["name"]}'] = text 
+                                            self.write_to_json(jobs, job)
+                                            x += 1
 
-                                                    
-                                            with st.form(f'my_form{x}', clear_on_submit=True):
-                                                text = st.text_area(label='Test', label_visibility='collapsed')
-                                                submitted = st.form_submit_button("Submit")
-                                                x += 1
+                                        notes = []
+                                        for keys, values in jobs[job]["Notes"].items():
+                                            notes.append(keys)
+                                        
+                                        notes.sort()
+                                        notes.reverse()
 
-                                            if submitted:
-                                                now = datetime.now()
-                                                dt = now.strftime("%d/%m/%Y - %H:%M:%S")
-                                                jobs[job]["Notes"][f'{dt} - {st.session_state["name"]}'] = text 
-                                                self.write_to_json(jobs, job)
-                                                x += 1
+                                        for note in notes:
 
-                                            notes = []
-                                            for keys, values in jobs[job]["Notes"].items():
-                                                notes.append(keys)
+                                            st.text_area(label=note, key=x, value=jobs[job]["Notes"][note], disabled=True)
+                                            x += 1
                                             
-                                            notes.sort()
-                                            notes.reverse()
 
-                                            for note in notes:
+                                    with m:
+    
+                                        array = []
+                                        
+                                        with st.form(f'My_form{x}'):
+                                            material = st.selectbox('Material', options=self.material_list(), key=x)
+                                            x += 1
+                                            quantity = st.number_input('Quantity', key=x)
+                                            x += 1
 
-                                                st.text_area(label=note, key=x, value=jobs[job]["Notes"][note], disabled=True)
-                                                x += 1
+                                            submitted = st.form_submit_button("Submit")
+                                        
+                                        if submitted:                                                   
+
+
+                                            item_list = []
+                                            for items in jobs[job]["Materials"]:
+                                                if material in items["Material"]:
+                                                    print('asdfasfasdfasdfasdf')
+                            
+                                                    q = float(items["Quantity"])
+                                                    
+                                                    q += quantity
+                                                    
+                                                    items["Quantity"] = q
+                                                    item_list.append((items["Material"]))
+                                                    
+                                                    self.write_to_json(jobs, job)
+                                                    
+                                                
+                                            if material not in item_list:
+                                                
+
+                                                if quantity == 0:
+                                                    pass
+                                                else:
+                                                    
+                                                    new = {
+                                                        "Material": f"{material}",
+                                                        "Quantity": quantity
+                                                    }
+                                                    jobs[job]["Materials"].append(new)
+                                                    self.write_to_json(jobs, job)
                                             
+                                                        
+        
+                                        for selection in jobs[job]["Materials"]:
+                                            
+                                            
+                                            array.append([selection["Material"], selection["Quantity"]])
+                                            print(array)
+
+                                            testu = False
+                                        if array != []:
+                                            df = pd.DataFrame(data=array, columns=["Material", "Quantity"])
+                                            hide = """
+                                            <style>
+                                            .row_heading.level0 {display:none}
+                                            .blank {display:none}
+                                            </style>"""
+                                            st.markdown(hide, unsafe_allow_html=True)
+                                            st.dataframe(df, width=500)
+
+
+
                         except:
                             pass
 
 
-            except:
-                
-                pass
-                
+
+
+            with complete:
+                for job in jobs:
+
+                    if job == 'config':
+                        pass
+                    if job == 'Other':
+                        pass
+
+                    try:
+                        if jobs[job]["Status"] == "Complete":
+                            with st.expander(job):
+                                t, p, n = st.tabs(self.body)
+                                with t:
+                                    listo = []
+                                    for items, values in jobs[job].items():
+                                        t = 0
+
+                                        try:
+                                            for thing in values:
+                                                new = [thing['Name'], thing['Date'], thing['Check-in'], thing['Check-out']]
+                                                listo.append(new)
+                                            
+                                        except:
+                                            pass
+                                    if listo != []:
+                                        df = pd.DataFrame(data=listo, columns=['Name', 'Date', 'Check-in', 'Check-out'])
+                                        st.dataframe(df, width=1000)
+                                with n:
+                                                
+                                        y = 1
+                                        z = 0
+
+
+                                                
+                                        with st.form(f'my_form{x}', clear_on_submit=True):
+                                            text = st.text_area(label='Test', label_visibility='collapsed')
+                                            submitted = st.form_submit_button("Submit")
+                                            x += 1
+
+                                        if submitted:
+                                            now = datetime.now()
+                                            dt = now.strftime("%d/%m/%Y - %H:%M:%S")
+                                            jobs[job]["Notes"][f'{dt} - {st.session_state["name"]}'] = text 
+                                            self.write_to_json(jobs, job)
+                                            x += 1
+
+                                        notes = []
+                                        for keys, values in jobs[job]["Notes"].items():
+                                            notes.append(keys)
+                                        
+                                        notes.sort()
+                                        notes.reverse()
+
+                                        for note in notes:
+
+                                            st.text_area(label=note, key=x, value=jobs[job]["Notes"][note], disabled=True)
+                                            x += 1
+                                        
+                    except:
+                        pass
+
+
 
         elif st.session_state["authentication_status"] is False:
             st.error('Username/password is incorrect')
