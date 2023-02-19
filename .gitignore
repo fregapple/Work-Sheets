@@ -1,5 +1,6 @@
 /test.py
-WorkSheets/firestore-key.json
+/WorkSheets/jobs.json
+/WorkSheets/firestore-key.json
+/jobs.json
 .streamlit/secrets.toml
-WorkSheets/config.yaml
-WorkSheets/jobs.json
+
