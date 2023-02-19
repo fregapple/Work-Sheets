@@ -722,9 +722,7 @@ class App:
 
             except:
                 
-                with st.spinner("Logging out.."):
-                    ttime.sleep(3)
-
+                pass
                 
 
         elif st.session_state["authentication_status"] is False:
