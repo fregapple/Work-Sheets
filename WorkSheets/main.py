@@ -37,9 +37,6 @@ class App:
         doc_ref = self.db.collection("JFJ Joinery")
         doc_ref = doc_ref.stream()
 
-
-    
-
     
         jobs = {doc.id:doc.to_dict() for doc in doc_ref}
         return jobs
@@ -49,14 +46,10 @@ class App:
     def write_to_json(self, text, job):
         
         doc_ref = self.db.collection("JFJ Joinery").document(job)
+        print(text[job])
 
         doc_ref.set(text[job])
 
-
-    def write_to_json2(self, text):
-        text = json.dumps(text, indent=4)
-        with open ('./WorkSheets/jobs.json', 'w') as outfile:
-            outfile.write(text)
 
 
     def read_json(self):
@@ -224,12 +217,10 @@ class App:
 
 
 
-    def auth_read(self):
-        if Path('./WorkSheets/config.yaml').is_file():
-            with open('./WorkSheets/config.yaml') as file:
-                config = yaml.load(file, Loader=yaml.FullLoader)
+    def auth_read(self, config):
 
-                authenticator = stauth.Authenticate(
+
+        authenticator = stauth.Authenticate(
                     config['credentials'],
                     config['cookie']['name'],
                     config['cookie']['key'],
@@ -239,12 +230,48 @@ class App:
 
         return authenticator
 
+    @st.cache
+    def convert_df(self, df):
+        return df.to_csv().encode('utf-8')
+
+    
+    def get_employee_list(self, jobs, job):
+        employees = []
+        for keys, items in jobs[job]["Employee_Variables"].items():
+            employees.append(keys)
+        employees.sort()
+        return employees
+
+    def update_credentials(self, first, last, email, passw, jobs):
+        hashed_password = stauth.Hasher([passw]).generate()
+        new = {
+                                "email": email,
+                                "name": f'{first} {last}',
+                                "password": hashed_password[0]
+        }
+        jobs['config']['credentials']['usernames'][first.lower()] = new
+        self.write_to_json(jobs, 'config')
+
+    def shift_search(self, jobs, employee, date_):
+        date_ = str(date_).split('-')
+        date_ = f'{date_[2]}/{date_[1]}/{date_[0]}'
+        total_hours = []
+        job_hours = []
+        for job in jobs:
+            if job == 'Other':
+                print(employee)
+                if len(employee) == 1:
+                    for shift in jobs[job]['Employee_Variables'][employee[0]]["Total_Hours"]:
+                        if shift['Date'] == date_:
+                            total_hours.append([[shift['Date'],shift['Check-in'],shift['Check-out'],8]])
+                    print(total_hours)
+
     
 
     def main(self):
         
         jobs = self.read_firestore()
-        authenticator = self.auth_read()
+        authenticator = self.auth_read(jobs['config'])
         
         name, authentication_status, username = authenticator.login('Login', 'main')
 
@@ -259,6 +286,45 @@ class App:
             
             with st.sidebar:
                 authenticator.logout('Logout', 'main')
+                if jobs["Other"]["Employee_Variables"][f"{st.session_state['name']}"]["Auth"] == "Super":
+                    
+                    with st.sidebar.expander('Create New User', expanded=False):
+                        with st.form(key='test9', clear_on_submit=True):
+                            
+                            fname_ = st.text_input('First Name', key='new_name', value='')
+                            lname_ = st.text_input('Last Name', key='new_last', value='')
+                            email_ = st.text_input('Email', key='email', value='@')
+                            passw_ = st.text_input('Temp Pass', key='pass', value='')
+                            autho_ = st.selectbox('User Type', ['Admin','Standard'])
+
+
+                            submitted1 = st.form_submit_button('Submit')
+
+                            if submitted1:
+                                print('hi')
+                                new = {"Auth": autho_,
+                                        "Break": "False",
+                                        "Check-in": "False",
+                                        "End": "",
+                                        "First_Login": True,
+                                        "Start": "",
+                                        "Total_Hours": [],
+                                        "Form": "False"}
+                                jobs["Other"]["Employee_Variables"][f'{fname_} {lname_}'] = new
+
+                                self.update_credentials(fname_, lname_, email_, passw_, jobs)                                
+                                self.write_to_json(jobs, "Other")
+                    with st.sidebar.expander('Search Timesheets', expanded=False):
+                        with st.form(key='test10', clear_on_submit=True):
+                            date_s = st.date_input('Date Start',key='date_s')
+                            date_e = st.date_input('Date End', key='date_e')
+                            emplo_ = st.multiselect('Employee', self.get_employee_list(jobs, 'Other'))
+                            search_ = st.form_submit_button(label='Search Timesheet')
+                            
+                            if search_:
+                                self.shift_search(jobs, emplo_, date_s)
+                
+                
 
             
             st.title('JFJ Joinery')
@@ -369,6 +435,8 @@ class App:
             with current:
                 for job in jobs:
                     if job == 'Other':
+                        pass
+                    if job == 'config':
                         pass
                     else:
                         
@@ -560,10 +628,6 @@ class App:
                                             </style>"""
                                             st.markdown(hide, unsafe_allow_html=True)
                                             st.dataframe(df, width=500)
-                                                        
-
-                                        
-                                        
 
 
 
@@ -572,17 +636,14 @@ class App:
 
 
 
-                                
-
-                                
-
-            
-
-
-
 
             with complete:
                 for job in jobs:
+
+                    if job == 'config':
+                        pass
+                    if job == 'Other':
+                        pass
 
                     try:
                         if jobs[job]["Status"] == "Complete":
