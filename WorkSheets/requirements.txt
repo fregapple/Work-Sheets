@@ -6,5 +6,4 @@ pytz
 google-cloud-firestore
 google-auth-oauthlib
 pandas
-pathlib
 protobuf==3.12.2
