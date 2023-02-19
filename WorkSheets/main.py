@@ -49,7 +49,7 @@ class App:
     def write_to_json(self, text, job):
         
         doc_ref = self.db.collection("JFJ Joinery").document(job)
-        print(text[job])
+        
 
         doc_ref.set(text[job])
 
@@ -262,19 +262,7 @@ class App:
                             total_hours.append([[shift['Date'],shift['Check-in'],shift['Check-out'],8]])
                     print(total_hours)
 
-    
-    def login_spinner(self, boo):
-        self.logged_in = boo
-        if self.logged_in == True:
 
-            with st.spinner("Logging in.."):
-                ttime.sleep(3)
-        
-        elif self.logged_in == False:
-            with st.spinner("Logging in.."):
-                ttime.sleep(3)
-            
-            
 
     
 
@@ -321,6 +309,7 @@ class App:
                                             "First_Login": True,
                                             "Start": "",
                                             "Total_Hours": [],
+                                            "Shed_Hours": [],
                                             "Form": "False"}
                                     jobs["Other"]["Employee_Variables"][f'{fname_} {lname_}'] = new
 
@@ -341,7 +330,7 @@ class App:
                 
 
             
-            st.title('JFJ Joinery')
+            st.title(':blue[JFJ Joinery]')
             st.write(f'Welcome *{st.session_state["name"]}*')
             c = st.container()
             hours = self.update_hours_tally(jobs, 1)
@@ -364,6 +353,16 @@ class App:
                     elif check_in["Check-in"] == "True":
                         dbut = c.button('End Day')
                         if dbut:
+                            for job in jobs:
+                                if job == "Other":
+                                    pass
+                                elif job == 'config':
+                                    pass
+                                else:
+                                    for shift in jobs[job]["Timesheets"]:
+                                        if shift["Check-out"] == '':
+                                            shift["Check-out"] = self.round_time(self.get_current_time())
+                                            self.write_to_json(jobs, job)
                             self.new_form = True
                             time = self.get_current_time()
                             check_in["End"] = self.round_time(self.get_current_time())
@@ -379,8 +378,9 @@ class App:
                     
                     hours = self.update_hours_tally(jobs, 2)
                     total = hours[0] + hours[1]
-                    st.write(f'You have worked {hours[1]} hours this shift!')
-                    st.write("Did you take a Lunch Break today?")
+                    st.header(':blue[Break Review]')
+                    st.write(f':blue[You have worked] {hours[1]} :blue[hours this shift!]')
+                    st.write(":blue[Did you take a Lunch Break today?]")
                     submitted = st.form_submit_button('Yes')
                     submitted2 = st.form_submit_button('No')
                     
@@ -402,13 +402,62 @@ class App:
 
 
             elif new_form["Form"] == "Form2":
+                time_list = self.time_list()
+                x = 0
 
+                with st.form("Confirm Hours"):
+                    st.header(':blue[Review Job Hours]')
+                    st.markdown(':blue[Please review your submitted hours below. Edit as required.]')
+                    for job in jobs:
+                        if job == 'Other':
+                            pass
+                        elif job == "config":
+                            pass
+                        else:
+                            for shift in jobs[job]["Timesheets"]:
+                                if shift['Date'] == self.get_current_date():
+                                    with st.expander(job, expanded=True):
+                                        s_ = time_list.index(shift['Check-in'])
+                                        try:
+                                            e_ = time_list.index(shift['Check-out'])
+                                        except:
+                                            e_ = time_list.index("00:00")
+                                        
+                                        st.selectbox('Start Time', options=time_list, index=s_, key=f'form2{x}')
+                                        x += 1
+                                        st.selectbox('End Time', options=time_list, index=e_,key=f'form2{x}')
+                                        x += 1
+                                        delete = st.checkbox('Delete', key=f"form2{x}")
+                                        x += 1
+                                        st.caption('Having the box checked when submitting, will delete your hours from this job')
+                                        x += 1
+                                        if delete:
+                                            st.warning('Are you sure you want to delete?')
+                                            choice = st.selectbox(label='a', options=['','Yes', 'No'], index=0, label_visibility='collapsed', key=x)
+                                            if choice == 'Yes':
+                                                print('asdfasdfasdf')
+                                        
+                                            
+
+                                        
+
+                    submitted3 = st.form_submit_button('Submit')
+                if submitted3:
+                    new_form["Form"] = 'Form3'
+                    self.write_to_json(jobs, 'Other')
+                    st.experimental_rerun()
+                    
+                        
+                            
+            elif new_form["Form"] == "Form3":
                 with st.form("Adjust Hours"):
-                    st.write("You can adjust hours here. Otherwise, please.")
-                    st.write("provide a short decscription and click Finish to complete.")
-                    submitted = st.form_submit_button("Finish")
+                    st.header(":blue[Adjust Total Hours]")
+                    st.write(":blue[You can adjust hours here. Otherwise, please]")
+                    st.write(":blue[provide a short decscription and click Finish to complete.]")
+                    
                     num = st.number_input(label='p', label_visibility='collapsed', key='num')
                     desc = st.text_area(label='p', label_visibility='collapsed', key='desc')
+                    submitted = st.form_submit_button("Finish")
 
                         
                         
@@ -448,6 +497,8 @@ class App:
             else:
                 pass
             x = 0
+            st.title("")
+            st.title("")
             current, complete = st.tabs(['Current', 'Complete'])
 
 
