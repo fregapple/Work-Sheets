@@ -13,7 +13,7 @@ RUN git clone https://github.com/fregapple/Work-Sheets.git
 RUN pip install -r ./Work-Sheets/requirements.txt
 
 COPY ./.streamlit/secrets.toml /app/.streamlit/secrets.toml
-EXPOSE 8501
+EXPOSE 80
 
 HEALTHCHECK CMD curl --fail http://localhost:8501/_stcore/HEALTHCHECK
 
