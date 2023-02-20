@@ -22,7 +22,7 @@ class App:
     creds = service_account.Credentials.from_service_account_info(key_dict)
     db = firestore.Client(credentials=creds)
 
-    print('test')
+   
 
     body = ['Timesheet', 'Materials', 'Notes']
     item3 = None
@@ -255,12 +255,12 @@ class App:
         job_hours = []
         for job in jobs:
             if job == 'Other':
-                print(employee)
+                
                 if len(employee) == 1:
                     for shift in jobs[job]['Employee_Variables'][employee[0]]["Total_Hours"]:
                         if shift['Date'] == date_:
                             total_hours.append([[shift['Date'],shift['Check-in'],shift['Check-out'],8]])
-                    print(total_hours)
+                    
 
 
 
@@ -301,7 +301,7 @@ class App:
                                 submitted1 = st.form_submit_button('Submit')
 
                                 if submitted1:
-                                    print('hi')
+                                    
                                     new = {"Auth": autho_,
                                             "Break": "False",
                                             "Check-in": "False",
@@ -497,8 +497,8 @@ class App:
             else:
                 pass
             x = 0
-            st.title("")
-            st.title("")
+            st.header("")
+            st.header("")
             current, complete = st.tabs(['Current', 'Complete'])
 
 
@@ -571,14 +571,16 @@ class App:
                                                                 jobs[job]["Timesheets"][y]["Check-out"] = str(item3)
                                                                 self.write_to_json(jobs, job)
                                                                 
-                                                                print('test')
+                                                                
                                                                 test = False
                                                             else: 
                                                                 y += 1
-                                                            
-                                                            
+                                                        else:
+                                                            y += 1
+     
                                                     else:
                                                         y += 1
+                                                    
                                                 except:
                                                     new = {"Name": f"{st.session_state['name']}",
                                                         "Date": f"{self.get_current_date()}",
@@ -587,7 +589,7 @@ class App:
                                                     jobs[job]["Timesheets"].append(new) 
                                                     self.write_to_json(jobs, job)
                                                     test = False
-                                                    print('test2')
+                                                    
 
                                                 
                                             
@@ -603,6 +605,7 @@ class App:
                                                 
                                             except:
                                                 pass
+                                        print(listo)
                                         if listo != []:
                                             df = pd.DataFrame(data=listo, columns=['Name', 'Date', 'Check-in', 'Check-out'])
                                             st.dataframe(df, width=1000)
@@ -654,7 +657,7 @@ class App:
                                             item_list = []
                                             for items in jobs[job]["Materials"]:
                                                 if material in items["Material"]:
-                                                    print('asdfasfasdfasdfasdf')
+                                                    
                             
                                                     q = float(items["Quantity"])
                                                     
@@ -686,7 +689,7 @@ class App:
                                             
                                             
                                             array.append([selection["Material"], selection["Quantity"]])
-                                            print(array)
+                                            
 
                                             testu = False
                                         if array != []:
