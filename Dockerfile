@@ -1,7 +1,6 @@
-FROM python:3.11-slim
+FROM python:3.11-slim@sha256:28e5366ce5c423639950d3962b668730535da08cd235bdacef32171e26cd2b5c
 
 WORKDIR /app
-
 RUN apt-get update && apt-get install -y \
     build-essential \
     curl \ 
@@ -11,10 +10,11 @@ RUN apt-get update && apt-get install -y \
 
 RUN git clone https://github.com/fregapple/Work-Sheets.git
 
-RUN pip install -r ./WorkSheets/requirements.txt
+RUN pip install -r ./Work-Sheets/requirements.txt
 
+COPY ./.streamlit/secrets.toml /app/.streamlit/secrets.toml
 EXPOSE 8501
 
 HEALTHCHECK CMD curl --fail http://localhost:8501/_stcore/HEALTHCHECK
 
-ENTRYPOINT ["streamlit", "run", "./WorkSheets/main.py", "--server.port=8501", "--server.address=0.0.0.0"]
+ENTRYPOINT ["streamlit", "run", "./Work-Sheets/WorkSheets/main.py"]
