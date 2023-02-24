@@ -9,15 +9,19 @@ import time as ttime
 from google.cloud import firestore
 from google.oauth2 import service_account
 from io import StringIO
+from openpyxl import Workbook
+from openpyxl.styles import Alignment, Font, PatternFill, Fill, Border, Side
+from openpyxl.utils import get_column_letter
+import io
+
 
 
 st.set_page_config(layout='wide')
 
 
-"""
-This is the App Class
+#  This is the APP Class
 
-"""
+
 class App:
     
     """
@@ -74,16 +78,23 @@ class App:
     Currently, it is putting a variable for a button in deleting times
     
     """
-    def initialise_sessions(self, jobs):
-        for job in jobs:
-            if job == 'Other':
-                pass
-            elif job == 'config':
-                pass
-            
-            elif f'{job}_button' not in st.session_state:
-                st.session_state[f'{job}_button'] = 'False'
-        return
+    def initialise_sessions(self, jobs, thing):
+        if jobs != 0:
+            for job in jobs:
+                if job == 'Other':
+                    pass
+                elif job == 'config':
+                    pass
+                
+                elif f'{job}_button' not in st.session_state:
+                    st.session_state[f'{job}_button'] = 'False'
+
+                st.session_state["Sheet_button"] = 'False'
+            return
+        elif jobs == 0:
+            if thing == 0:
+                return
+            st.session_state[f'{thing}'] = 'False'
 
        
 
@@ -399,7 +410,230 @@ class App:
                 self.j_list.append(job)
         return self.j_list
 
+
+    """
+    TEST
+    
+    """
+    def timesheet_tool(self, datestart, dateend, employees, jobs):
+        daterange = pd.date_range(datestart, dateend).strftime("%d/%m/%Y")
+        job_l = []
+        job_l_array = []
+
+        for name in employees:
+            for date in daterange:
+                for job in jobs:
+                    if job == 'Other':
+                        pass
+                    elif job == 'config':
+                        pass
+                    else:
+                        
+                        for shift in jobs[job]["Timesheets"]:
+
+                            if shift['Name'] == name:
+                            
+                                if shift['Date'] == str(date):
+                                
+                                    job_l.append(shift)
+                jobo = job_l.copy()
+                job_l_array.append(jobo)
+                job_l.clear()
+            
         
+
+
+        return job_l_array
+
+    
+    def create_timesheet_spreadsheet(self, array):
+        workbook = Workbook()
+        sheet = workbook.active
+        values = self.spread_sheet_value_list()
+        jobs = []
+        dates = []
+        names = []
+        items_ = []
+        name_r = 3
+        abc = 1
+        dates_ = 1
+        write = {}
+        colors = ['00CCFFFF', '00CCCCFF', '00CCFFCC', '00FFFFCC', '00FFFF00', '00FFCC99']
+        for items in array:
+            for item in items:
+                if item['Job'] not in jobs:
+                    jobs.append(item['Job'])
+                if item['Date'] not in dates:
+                    dates.append(item['Date'])
+                if item['Name'] not in names:
+                    names.append(item['Name'])
+                items_.append(item)
+        spacing_ = len(jobs) + 1
+        dates.sort()
+
+        t_font = Font(bold=True)
+        d_font = Font(bold=True, size=13)
+        thin_border = Border(left=Side(style='thin'),
+                             right=Side(style='thin'),
+                             top=Side(style='thin'),
+                             bottom=Side(style='thin')
+                             )
+
+
+        for date in dates:
+            
+            sheet.merge_cells(f'{values[dates_]}1:{values[(dates_ +spacing_)]}1')
+            top_left_cell = sheet[f'{values[dates_]}1']
+            top_left_cell.alignment = Alignment(horizontal="center",vertical="center")
+            DATE = sheet[f'{values[dates_]}1']
+            DATE.font = d_font
+            DATE.value = date
+            DATE.fill = PatternFill('solid', '0099CCFF')
+            DATE.border = thin_border
+            
+
+            dates_ += spacing_ + 1
+        jobs.sort()    
+        
+        
+        for date in dates:
+            for job in jobs:
+            
+                JOB = sheet[f'{values[abc]}2']
+                JOB.font = t_font
+                JOB.value = job
+                JOB.border = thin_border
+                abc += 1
+
+            SHED = sheet[f'{values[abc]}2']
+            SHED.font = t_font
+            SHED.value = 'Shed'
+            SHED.border = thin_border
+            abc += 1
+            TOTAL = sheet[f'{values[abc]}2']
+            TOTAL.font = t_font
+            TOTAL.value = 'TOTAL'
+            TOTAL.border = thin_border
+            abc += 1
+        GRANDTOTAL = sheet[f'{values[abc]}2']
+        
+        GRANDTOTAL.font = t_font
+        GRANDTOTAL.value = 'GRAND TOTAL'
+        GRANDTOTAL.border = thin_border
+        
+        endCol = values[abc]
+        names.sort()
+        for name in names:
+            NAME = sheet[f'A{name_r}']
+            NAME.value = name
+            NAME.border = thin_border
+            name_r += 1
+        TOTAL2 = sheet[f'A{name_r}']
+        TOTAL2.font = t_font
+        TOTAL2.value = 'TOTAL'
+        TOTAL2.border = thin_border
+        spacing_ = len(jobs) + 2
+        for item_ in items_:
+            if item_['Name'] in names:
+                nidx = names.index(item_['Name']) + 3
+
+                if item_['Date'] in dates:
+                    didx = dates.index(item_['Date'])
+                    xxx = didx * spacing_
+                    endci = didx + 1
+                    endc = spacing_ * endci
+                    reverseE = endc - 1
+                    reverseS = endc - (len(jobs) + 1)
+                    sheet[f'{values[(endc)]}{nidx}'] = f'=sum({values[reverseS]}{nidx}:{values[reverseE]}{nidx})'
+                    sheet[f'{values[(endc)]}{name_r}'] = f'=sum({values[reverseS]}{name_r}:{values[reverseE]}{name_r})'
+
+                    ve = reverseE - reverseS + 1
+                    
+                    while ve > 0:
+                        sheet[f'{values[(endc-ve)]}{name_r}'] = f'=sum({values[(endc-ve)]}{name_r-1}:{values[(endc-ve)]}{3})'
+                        n = len(names)
+                        
+                        while n > -1:
+                            colored_cell = sheet.cell(column=endc-n, row=name_r - ve)
+                            colored_cell.fill = PatternFill('solid', fgColor=colors[n])
+                            colored_cell.border = thin_border
+                            n -= 1
+                        ve -= 1
+                        
+
+                    if item_['Job'] in jobs:
+                        
+                        jidx = jobs.index(item_['Job']) + 2
+
+                        if f'{values[(jidx+xxx)-1]}{nidx}' in write:
+                            combine = int(write[f'{values[(jidx+xxx)-1]}{nidx}']) + int(item_['Total'])
+                            write[f'{values[(jidx+xxx)-1]}{nidx}'] = combine
+                            
+                        else:
+                            write[f'{values[(jidx+xxx)-1]}{nidx}'] = item_['Total']
+        
+                        
+
+                        sheet[f'{values[(jidx+xxx)-1]}{nidx}'] = write[f'{values[(jidx+xxx)-1]}{nidx}']
+                gt = (len(dates) * (len(jobs) + 2)) + 1
+                ts = gt - 1
+                ti = ts / len(dates)
+                tl = []
+                tll = []
+                while ts > 0:
+                    tl.append(ts)
+                    ts = ts - ti
+                for v in tl:
+                    
+                    tll.append(values[int(v)])
+                mystring = ''.join([str(item + f'{nidx},') for item in tll])
+                sheet[f'{values[gt]}{nidx}'] = f'=sum({mystring})'
+                sheet[f'{values[gt]}{name_r}'] = f'=sum({values[gt]}{name_r-1}:{values[gt]}{3})'
+            
+   
+        column_widths = []
+        for row in sheet:
+            for i, cell in enumerate(row):
+                if len(column_widths) > i:
+                    if len(str(cell)) > column_widths[i]:
+                        column_widths[i] = len(str(cell))
+                else:
+                    column_widths += [len(str(cell))]
+
+        for i, column_width in enumerate(column_widths, 1):
+            sheet.column_dimensions[get_column_letter(i)].width = column_width
+        freeze = sheet['B1']
+        sheet.freeze_panes = freeze
+        return workbook
+
+    
+
+
+    def spread_sheet_value_list(self):
+        ssvl = ['a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z']
+        ssvl_ = ssvl.copy()
+        ssvl__ = ssvl.copy()
+        extended_ssvl = []
+        for item in ssvl:
+            for i in ssvl_:
+                extended_ssvl.append(f'{item}{i}')
+
+        ssvl__.extend(extended_ssvl)
+        return ssvl__
+
+
+
+    def calc_hours(self, in_, out_):
+        ts = in_
+        te = out_
+        ts = self.convert_to_int(ts)
+        te = self.convert_to_int(te)
+        tf = te - ts
+        tf = round(tf, 1)
+
+        return  tf
+        
+
         
     """
     This is the main function. This is where the apps code and commands come from.
@@ -427,7 +661,7 @@ class App:
         # If you login, status = True and then starts the main script.
         if st.session_state["authentication_status"]:
 
-            self.initialise_sessions(jobs)
+            self.initialise_sessions(jobs, 0)
 
             # This is going to determine all the widgets available in the sidebar.
             with st.sidebar:
@@ -495,7 +729,7 @@ class App:
                                     }
                                     jobs[job_title] = new
 
-                                    self.initialise_sessions(jobs)
+                                    self.initialise_sessions(jobs, 0)
                                 
                                     self.write_to_json(jobs, job_title)
                                     
@@ -578,6 +812,7 @@ class App:
                     # This Widget will allow you to search Employee Timesheets.
                     #   FIXME: This is still a WIP.
                     with st.sidebar.expander('Search Timesheets', expanded=False):
+                        
                         with st.form(key='test10', clear_on_submit=True):
                             date_s = st.date_input('Date Start',key='date_s')
                             date_e = st.date_input('Date End', key='date_e')
@@ -585,7 +820,21 @@ class App:
                             search_ = st.form_submit_button(label='Search Timesheet')
                             
                             if search_:
-                                self.shift_search(jobs, emplo_, date_s)
+                                result = self.timesheet_tool(date_s, date_e, emplo_, jobs)
+                                workbook = self.create_timesheet_spreadsheet(result)
+                                vbook = io.BytesIO()
+                                workbook.save(vbook)
+                                st.session_state["Sheet_button"] = 'True'
+                                                             
+
+                                
+                        if st.session_state["Sheet_button"] == 'True':            
+                            down = st.download_button("Download Spreadsheet", data=vbook, mime='xlsx', file_name='test.xlsx')
+                            if down:
+                                st.session_state["Sheet_button"] = 'False'
+                                
+
+
                          
 
             # This will print Company name to the top of the screen
@@ -824,7 +1073,9 @@ class App:
                                                     new = {"Name": f"{st.session_state['name']}",
                                                         "Date": f"{item2.strftime('%d/%m/%Y')}",
                                                         "Check-in": f"{str(item3)}",
-                                                        "Check-out": ""}
+                                                        "Check-out": "",
+                                                        "Total":"",
+                                                        "Job":f"{job}"}
                                                     jobs[job]["Timesheets"].append(new) 
                                                     self.write_to_json(jobs, job)
                                                     test = False
@@ -837,6 +1088,10 @@ class App:
                                                             test = False
                                                         elif jobs[job]["Timesheets"][y]["Check-out"] == '':
                                                             jobs[job]["Timesheets"][y]["Check-out"] = str(item3)
+                                                            
+                                                            calc = self.calc_hours(jobs[job]["Timesheets"][y]["Check-in"],str(item3))
+                                                            
+                                                            jobs[job]["Timesheets"][y]["Total"] = calc
                                                             self.write_to_json(jobs, job)
                                                             
                                                             
@@ -853,7 +1108,9 @@ class App:
                                                 new = {"Name": f"{st.session_state['name']}",
                                                     "Date": f"{item2.strftime('%d/%m/%Y')}",
                                                     "Check-in": f"{str(item3)}",
-                                                    "Check-out": ""}
+                                                    "Check-out": "",
+                                                    "Total": "",
+                                                    "Job": f"{job}"}
                                                 jobs[job]["Timesheets"].append(new) 
                                                 self.write_to_json(jobs, job)
                                                 test = False

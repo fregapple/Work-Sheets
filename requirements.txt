@@ -7,3 +7,5 @@ google-cloud-firestore
 google-auth-oauthlib
 pandas
 protobuf==3.12.2
+openpyxl
+io
