@@ -49,7 +49,7 @@ class App:
     st.cache is used to not read this over and over after every interaction.
     
     """
-    @st.experimental_singleton(show_spinner=False)
+    @st.cache_resource(show_spinner=False)
     def read_firestore(_self):
         
         
@@ -306,14 +306,6 @@ class App:
         return authenticator
 
 
-    """
-    This could be a download function. I am not sure I will need to use this.
-    
-    """
-    @st.experimental_singleton(show_spinner=False)
-    def convert_df(self, df):
-        return df.to_csv().encode('utf-8')
-
     
     """
     This retrieves a list of employee's registered
@@ -419,12 +411,21 @@ class App:
         daterange = pd.date_range(datestart, dateend).strftime("%d/%m/%Y")
         job_l = []
         job_l_array = []
+        shed_l = []
+        shed_l_array = []
 
         for name in employees:
             for date in daterange:
                 for job in jobs:
                     if job == 'Other':
-                        pass
+                        for shed_hours in jobs[job]["Employee_Variables"][name]["Shed_Hours"]:
+                            if shed_hours["Date"] == str(date):
+                                shed_l.append(shed_hours)
+
+
+
+                            
+
                     elif job == 'config':
                         pass
                     else:
@@ -436,24 +437,36 @@ class App:
                                 if shift['Date'] == str(date):
                                 
                                     job_l.append(shift)
+
                 jobo = job_l.copy()
                 job_l_array.append(jobo)
                 job_l.clear()
+            shedo = shed_l.copy()
+            shed_l_array.append(shedo)
+            shed_l.clear()
+
+
+
             
         
 
 
-        return job_l_array
+        return job_l_array, shed_l_array
 
     
-    def create_timesheet_spreadsheet(self, array):
+    def create_timesheet_spreadsheet(self, array, array2):
         workbook = Workbook()
         sheet = workbook.active
         values = self.spread_sheet_value_list()
+        corrected_shed_hours = self.evaluate_hours(array2)
+        print('$$$$$$$$$$')
+        print(corrected_shed_hours)
+        
         jobs = []
         dates = []
         names = []
         items_ = []
+        things_ = []
         name_r = 3
         abc = 1
         dates_ = 1
@@ -469,6 +482,14 @@ class App:
                     names.append(item['Name'])
                 items_.append(item)
         spacing_ = len(jobs) + 1
+
+        for things in corrected_shed_hours:
+            for thing in things:
+                if thing['Date'] not in dates:
+                    dates.append(thing['Date'])
+                if thing['Name'] not in names:
+                    names.append(thing['Name'])
+                things_.append(thing)
         dates.sort()
 
         t_font = Font(bold=True)
@@ -493,9 +514,12 @@ class App:
             
 
             dates_ += spacing_ + 1
+            
+
         jobs.sort()    
-        
-        
+        didx = 1
+        spacing_ = len(jobs) + 2
+
         for date in dates:
             for job in jobs:
             
@@ -504,6 +528,8 @@ class App:
                 JOB.value = job
                 JOB.border = thin_border
                 abc += 1
+
+            
 
             SHED = sheet[f'{values[abc]}2']
             SHED.font = t_font
@@ -515,6 +541,27 @@ class App:
             TOTAL.value = 'TOTAL'
             TOTAL.border = thin_border
             abc += 1
+
+            nidx = 3
+            endc = didx * spacing_
+            reverseE = endc - 1
+            reverseS = endc - (len(jobs) + 1)
+            for name in names:
+
+                total = sheet[f'{values[(endc)]}{nidx}']
+                total.value = f'=sum({values[reverseS]}{nidx}:{values[reverseE]}{nidx})'
+                total.border = thin_border
+                nidx += 1
+            
+            
+            base_total = sheet[f'{values[(endc)]}{name_r}']
+            base_total.value = f'=sum({values[reverseS]}{name_r}:{values[reverseE]}{name_r})'
+            base_total.border = thin_border
+            didx += 1
+
+            
+
+            
         GRANDTOTAL = sheet[f'{values[abc]}2']
         
         GRANDTOTAL.font = t_font
@@ -523,6 +570,7 @@ class App:
         
         endCol = values[abc]
         names.sort()
+
         for name in names:
             NAME = sheet[f'A{name_r}']
             NAME.value = name
@@ -533,6 +581,19 @@ class App:
         TOTAL2.value = 'TOTAL'
         TOTAL2.border = thin_border
         spacing_ = len(jobs) + 2
+        
+
+        for thing_ in things_:
+            if thing_['Name'] in names:
+                nidx = names.index(thing_['Name']) + 3
+
+                if thing_['Date'] in dates:
+                    didx = dates.index(thing_['Date'])
+                    xxx = didx * spacing_
+
+                    sidx = len(jobs) + 1
+
+                    sheet[f'{values[sidx + xxx]}{nidx}'] = thing_['Hours']
         for item_ in items_:
             if item_['Name'] in names:
                 nidx = names.index(item_['Name']) + 3
@@ -607,6 +668,47 @@ class App:
         return workbook
 
     
+    def evaluate_hours(self, array):
+        print('------------------')
+        print(array)
+        new_l = []
+        new_array = []
+        
+        for items in array:
+            for shift in items:
+
+                for i in new_l:
+                    if i['Date'] == shift['Date']:
+                        
+                        i['Hours'] = shift['Hours'] + i['Hours']
+                        print('hi')
+                    else:
+                        new = {'Hours': shift['Hours'],
+                               'Name': shift['Name'],
+                               'Date': shift['Date'],
+                               'OT': shift['OT']}
+                        new_l.append(new)
+
+                if new_l == []:
+                    new = {'Hours': shift['Hours'],
+                            'Name': shift['Name'],
+                            'Date': shift['Date'],
+                            'OT': shift['OT']}
+                    new_l.append(new)
+
+                    
+
+
+            newo = new_l.copy()
+            new_array.append(newo)
+            new_l.clear()
+        
+        
+        
+
+        return new_array
+                
+
 
 
     def spread_sheet_value_list(self):
@@ -821,7 +923,7 @@ class App:
                             
                             if search_:
                                 result = self.timesheet_tool(date_s, date_e, emplo_, jobs)
-                                workbook = self.create_timesheet_spreadsheet(result)
+                                workbook = self.create_timesheet_spreadsheet(result[0],result[1])
                                 vbook = io.BytesIO()
                                 workbook.save(vbook)
                                 st.session_state["Sheet_button"] = 'True'
@@ -930,8 +1032,10 @@ class App:
                         elif job == "config":
                             pass
                         else:
+                            b = 1
                             for shift in jobs[job]["Timesheets"]:
                                 if shift['Date'] == self.get_current_date():
+                                    
                                     with st.expander(job, expanded=True):
                                         s_ = time_list.index(shift['Check-in'])
                                         try:
@@ -939,19 +1043,32 @@ class App:
                                         except:
                                             e_ = time_list.index("00:00")
                                         
-                                        st.selectbox('Start Time', options=time_list, index=s_, key=f'form2{x}')
+                                        new_s = st.selectbox('Start Time', options=time_list, index=s_, key=f'form2{x}')
                                         x += 1
-                                        st.selectbox('End Time', options=time_list, index=e_,key=f'form2{x}')
+                                        new_e = st.selectbox('End Time', options=time_list, index=e_,key=f'form2{x}')
                                         x += 1
                                         delete = st.checkbox('Delete', key=f"form2{x}")
                                         x += 1
                                         st.caption('Having the box checked when submitting, will delete your hours from this job')
                                         x += 1
-                                        if delete:
-                                            st.warning('Are you sure you want to delete?')
-                                            choice = st.selectbox(label='a', options=['','Yes', 'No'], index=0, label_visibility='collapsed', key=x)
-                                            if choice == 'Yes':
-                                                print('asdfasdfasdf')
+                                        
+                                        job_submit = st.form_submit_button(f'Edit {job} {b}')
+                                        b += 1
+                                        if job_submit:
+                                            s_i =jobs [job]["Timesheets"].index(shift)
+                                            if delete:
+                                                
+                                                self.db.collection("JFJ Joinery").document(job).update({
+                                                                "Timesheets": firestore.ArrayRemove([jobs[job]["Timesheets"][s_i]])
+                                                })
+                                                jobs[job]["Timesheets"].pop(s_i)
+                                                st.experimental_rerun()
+
+                                            else:
+                                                jobs[job]["Timesheets"][s_i]["Check-in"] = new_s
+                                                jobs[job]["Timesheets"][s_i]["Check-out"] = new_e
+                                                self.write_to_json(jobs, job)
+                                                st.experimental_rerun()
                                         
                                             
 
@@ -996,6 +1113,7 @@ class App:
                             "Description": f"{desc}"}
 
                         new_form["Total_Hours"].append(new)
+                        
 
                         new_form["Start"] = ''
                         new_form["End"] = ''
@@ -1003,7 +1121,12 @@ class App:
                         new_form["Check-in"] = 'False'
                         new_form["Form"] = 'False'
                         self.write_to_json(jobs, "Other")
-                        
+                        hours = self.update_hours_tally(jobs, 1)
+                        new_form["Shed_Hours"].append({"Name": st.session_state['name'],
+                                                       "Date": f'{self.get_current_date()}',
+                                                       "Hours": hours[1],
+                                                       "OT": hours[0]})
+                        self.write_to_json(jobs, "Other")
                         st.experimental_rerun()
                         
 
@@ -1114,6 +1237,8 @@ class App:
                                                 jobs[job]["Timesheets"].append(new) 
                                                 self.write_to_json(jobs, job)
                                                 test = False
+
+                                        st.experimental_rerun()
                                                 
 
 
