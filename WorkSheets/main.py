@@ -13,10 +13,13 @@ from openpyxl import Workbook
 from openpyxl.styles import Alignment, Font, PatternFill, Fill, Border, Side
 from openpyxl.utils import get_column_letter
 import io
+from PIL import Image
 
 
-
-st.set_page_config(layout='wide')
+im = Image.open('./apple-touch-icon.png')
+icolist = ['./apple-touch-icon.png', './favicon.ico']
+st.set_page_config(layout='wide', page_title='WorkSheets', page_icon=icolist[0])
+st.image(icolist[1])
 
 
 #  This is the APP Class
@@ -615,9 +618,12 @@ class App:
                         n = len(names)
                         
                         while n > -1:
-                            colored_cell = sheet.cell(column=endc-n, row=name_r - ve)
-                            colored_cell.fill = PatternFill('solid', fgColor=colors[n])
-                            colored_cell.border = thin_border
+                            try:
+                                colored_cell = sheet.cell(column=endc-n, row=name_r - ve)
+                                colored_cell.fill = PatternFill('solid', fgColor=colors[n])
+                                colored_cell.border = thin_border
+                            except:
+                                None
                             n -= 1
                         ve -= 1
                         
