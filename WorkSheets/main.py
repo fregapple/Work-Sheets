@@ -125,12 +125,12 @@ class App:
     This function updates the maintains the Tally at the top of the screen.
     
     """
-    def update_hours_tally(self, jobs, type):
+    def update_hours_tally(self, jobs, type, date, hours_):
         hour_list = []
         time = jobs["Other"]["Employee_Variables"][f'{st.session_state["name"]}']
         if type == 1:
             for punches in time["Total_Hours"]:
-                if punches["Date"] == self.get_current_date():
+                if punches["Date"] == date:
                     checkin = self.convert_to_int(punches["Check-in"])
                     checkout = self.convert_to_int(punches["Check-out"])
                     if punches["Break"] == 'Yes':
@@ -142,21 +142,25 @@ class App:
 
 
             try:
-                checkin_ = self.convert_to_int(time["Start"])
-                checkout_ = self.convert_to_int(self.get_current_time())
-                value_ = checkout_ - checkin_
-                hour_list.append(value_)
+                if time['Date'] == self.get_current_date():
+                    checkin_ = self.convert_to_int(time["Start"])
+                    checkout_ = self.convert_to_int(self.get_current_time())
+                    value_ = checkout_ - checkin_
+                    hour_list.append(value_)
             except:
                 pass
 
-        if type == 2:
+        elif type == 2:
             checkin = self.convert_to_int(time["Start"])
             checkout = self.convert_to_int(time["End"])
             hours = checkout - checkin
+
+        elif type == 3:
+            hours = hours_
             
             
 
-        if type == 1:      
+        elif type == 1:      
             hours = 0
             for ele in range(0, len(hour_list)):
                 hours = hours + hour_list[ele]
@@ -164,7 +168,11 @@ class App:
 
         try:
             if hours > 8:
+                
+                
                 OT = hours - 8
+                hours = 8
+                
 
 
             else:
@@ -173,7 +181,8 @@ class App:
         except:
             hours = 0
             OT = 0
-
+        print(hours)
+        print(OT)
         return OT, hours
 
 
@@ -486,13 +495,15 @@ class App:
                 items_.append(item)
         spacing_ = len(jobs) + 1
 
-        for things in corrected_shed_hours:
-            for thing in things:
-                if thing['Date'] not in dates:
-                    dates.append(thing['Date'])
-                if thing['Name'] not in names:
-                    names.append(thing['Name'])
-                things_.append(thing)
+        for things_ in corrected_shed_hours:
+            for thing_ in things_:
+                if thing_['Date'] not in dates:
+                    dates.append(thing_['Date'])
+
+                if thing_['Name'] not in names:
+                    names.append(thing_['Name'])
+
+
         dates.sort()
 
         t_font = Font(bold=True)
@@ -584,6 +595,7 @@ class App:
         TOTAL2.value = 'TOTAL'
         TOTAL2.border = thin_border
         spacing_ = len(jobs) + 2
+        
         
 
         for thing_ in things_:
@@ -742,6 +754,30 @@ class App:
         return  tf
         
 
+    def new_timesheet(self, name, date, checkin, job):
+        new = {"Name":name,
+               "Date":date,
+               "Check-in": checkin,
+               "Check-out": "",
+               "Total": "",
+               "Job":job}
+        return new
+    
+
+    def first_login(self, jobs, user, username):
+        usr = jobs["Other"]["Employee_Variables"][user]
+        if usr['First_Login'] == True:
+            new_pass = st.text_input('Enter New Password')
+            submitbut = st.button('Submit', key='NewPassButton')
+            if submitbut:
+                hashed_pass = stauth.Hasher([new_pass]).generate()
+
+                jobs['config']['credentials']['usernames'][username]['password'] = hashed_pass[0]
+                self.write_to_json(jobs, 'config')
+                jobs['Other']['Employee_Variables'][user]['First_Login'] = False
+                self.write_to_json(jobs, 'Other')
+                st.experimental_rerun()
+
         
     """
     This is the main function. This is where the apps code and commands come from.
@@ -768,6 +804,8 @@ class App:
 
         # If you login, status = True and then starts the main script.
         if st.session_state["authentication_status"]:
+
+            self.first_login(jobs, name, username)
 
             self.initialise_sessions(jobs, 0)
 
@@ -954,7 +992,7 @@ class App:
             # This creates a starter container.. Not sure if really needed.
             c = st.container()
 
-            hours = self.update_hours_tally(jobs, 1)
+            hours = self.update_hours_tally(jobs, 1, self.get_current_date(), None)
             tally = pd.DataFrame(data=[[self.get_current_date(), hours[1], hours[0]]], columns=["Date", "Hours Today","Overtime"])
             
             with c:
@@ -968,6 +1006,7 @@ class App:
                     if check_in["Check-in"] == "False":
                         dbut = c.button('Start Day')
                         if dbut:
+                            check_in["Date"] = self.get_current_date()
                             check_in["Check-in"] = "True"
                             check_in["Start"] = self.round_time(self.get_current_time(), 15)
                             self.write_to_json(jobs, "Other")
@@ -975,32 +1014,45 @@ class App:
                             st.experimental_rerun()
 
                     elif check_in["Check-in"] == "True":
-                        dbut = c.button('End Day')
-                        if dbut:
-                            for job in jobs:
-                                if job == "Other":
-                                    pass
-                                elif job == 'config':
-                                    pass
-                                else:
-                                    for shift in jobs[job]["Timesheets"]:
-                                        if shift["Check-out"] == '':
-                                            shift["Check-out"] = self.round_time(self.get_current_time(), 15)
-                                            self.write_to_json(jobs, job)
-                            self.new_form = True
-                            time = self.get_current_time()
-                            check_in["End"] = self.round_time(self.get_current_time(), 15)
-                            check_in["Form"] = "Form1"
-                    
+                        if check_in["Date"] != self.get_current_date():
+                            check_in['Form'] = 'Form2'
+                            check_in['End'] = check_in['Start']
+                            check_in['Break'] = 'Yes'
+                            check_in['Check-in'] = ''
                             self.write_to_json(jobs, "Other")
-                            
                             st.experimental_rerun()
+
+                        elif check_in['Form'] == 'False':
+                            dbut = c.button('End Day')
+                            if dbut:
+                                for job in jobs:
+                                    if job == "Other":
+                                        pass
+                                    elif job == 'config':
+                                        pass
+                                    else:
+                                        for shift in jobs[job]["Timesheets"]:
+                                            if shift["Check-out"] == '':
+                                                if shift['Name'] == st.session_state['name']:
+                                                    if shift['Date'] == self.get_current_date():
+                                                        shift["Check-out"] = self.round_time(self.get_current_time(), 15)
+                                                        self.write_to_json(jobs, job)
+                                                
+
+                                        self.new_form = True
+                                        time = self.get_current_time()
+                                        check_in["End"] = self.round_time(self.get_current_time(), 15)
+                                        check_in["Form"] = "Form1"
+                                
+                                        self.write_to_json(jobs, "Other")
+                                        
+                                        st.experimental_rerun()
             new_form = jobs["Other"]["Employee_Variables"][f"{st.session_state['name']}"]
             if new_form["Form"] == "Form1":
                 
                 with st.form("EOD", clear_on_submit=False):
                     
-                    hours = self.update_hours_tally(jobs, 2)
+                    hours = self.update_hours_tally(jobs, 2, self.get_current_date(), None)
                     total = hours[0] + hours[1]
                     st.header(':blue[Break Review]')
                     st.write(f':blue[You have worked] {hours[1]} :blue[hours this shift!]')
@@ -1039,43 +1091,46 @@ class App:
                             pass
                         else:
                             b = 1
-                            for shift in jobs[job]["Timesheets"]:
-                                if shift['Date'] == self.get_current_date():
-                                    
-                                    with st.expander(job, expanded=True):
-                                        s_ = time_list.index(shift['Check-in'])
-                                        try:
-                                            e_ = time_list.index(shift['Check-out'])
-                                        except:
-                                            e_ = time_list.index("00:00")
-                                        
-                                        new_s = st.selectbox('Start Time', options=time_list, index=s_, key=f'form2{x}')
-                                        x += 1
-                                        new_e = st.selectbox('End Time', options=time_list, index=e_,key=f'form2{x}')
-                                        x += 1
-                                        delete = st.checkbox('Delete', key=f"form2{x}")
-                                        x += 1
-                                        st.caption('Having the box checked when submitting, will delete your hours from this job')
-                                        x += 1
-                                        
-                                        job_submit = st.form_submit_button(f'Edit {job} {b}')
-                                        b += 1
-                                        if job_submit:
-                                            s_i =jobs [job]["Timesheets"].index(shift)
-                                            if delete:
-                                                
-                                                self.db.collection("JFJ Joinery").document(job).update({
-                                                                "Timesheets": firestore.ArrayRemove([jobs[job]["Timesheets"][s_i]])
-                                                })
-                                                jobs[job]["Timesheets"].pop(s_i)
-                                                st.experimental_rerun()
 
-                                            else:
-                                                jobs[job]["Timesheets"][s_i]["Check-in"] = new_s
-                                                jobs[job]["Timesheets"][s_i]["Check-out"] = new_e
-                                                self.write_to_json(jobs, job)
-                                                st.experimental_rerun()
-                                        
+                            for shift in jobs[job]["Timesheets"]:
+                                if shift['Date'] == check_in['Date']:
+
+                                    if shift['Name'] == st.session_state['name']:
+                                    
+                                        with st.expander(job, expanded=True):
+                                            s_ = time_list.index(shift['Check-in'])
+                                            try:
+                                                e_ = time_list.index(shift['Check-out'])
+                                            except:
+                                                e_ = time_list.index("00:00")
+                                            
+                                            new_s = st.selectbox('Start Time', options=time_list, index=s_, key=f'form2{x}')
+                                            x += 1
+                                            new_e = st.selectbox('End Time', options=time_list, index=e_,key=f'form2{x}')
+                                            x += 1
+                                            delete = st.checkbox('Delete', key=f"form2{x}")
+                                            x += 1
+                                            st.caption('Having the box checked when submitting, will delete your hours from this job')
+                                            x += 1
+                                            
+                                            job_submit = st.form_submit_button(f'Edit {job} {b}')
+                                            b += 1
+                                            if job_submit:
+                                                s_i =jobs [job]["Timesheets"].index(shift)
+                                                if delete:
+                                                    
+                                                    self.db.collection("JFJ Joinery").document(job).update({
+                                                                    "Timesheets": firestore.ArrayRemove([jobs[job]["Timesheets"][s_i]])
+                                                    })
+                                                    jobs[job]["Timesheets"].pop(s_i)
+                                                    st.experimental_rerun()
+
+                                                else:
+                                                    jobs[job]["Timesheets"][s_i]["Check-in"] = new_s
+                                                    jobs[job]["Timesheets"][s_i]["Check-out"] = new_e
+                                                    self.write_to_json(jobs, job)
+                                                    st.experimental_rerun()
+                                            
                                             
 
                                         
@@ -1091,6 +1146,8 @@ class App:
             elif new_form["Form"] == "Form3":
                 with st.form("Adjust Hours"):
                     st.header(":blue[Adjust Total Hours]")
+
+                    st.write(f':blue[Your hours for] {new_form["Date"]} :blue[are:] {self.update_hours_tally(jobs, 1, new_form["Date"], None)[1]}')
                     st.write(":blue[You can adjust hours here. Otherwise, please]")
                     st.write(":blue[provide a short decscription and click Finish to complete.]")
                     
@@ -1106,12 +1163,17 @@ class App:
                         value = self.convert_to_int(new_form["End"])
                         
                         value = value + num
-                        
                         value = self.convert_to_time(value)
+
+                        hours = self.convert_to_int(new_form['End']) - self.convert_to_int(new_form['Start'])
+                        hours = hours + num
+                        hours = self.update_hours_tally(jobs, 3, None, hours)
+
+                        
                         
 
 
-                        new = {"Date": f"{self.get_current_date()}",
+                        new = {"Date": new_form["Date"],
                             "Check-in": f"{new_form['Start']}",
                             "Check-out": f"{value}",
                             "Break": f"{new_form['Break']}",
@@ -1121,17 +1183,20 @@ class App:
                         new_form["Total_Hours"].append(new)
                         
 
+
+                        
+                        new_form["Shed_Hours"].append({"Name": st.session_state['name'],
+                                                       "Date": new_form['Date'],
+                                                       "Hours": hours[1],
+                                                       "OT": hours[0]})
+                        
                         new_form["Start"] = ''
                         new_form["End"] = ''
                         new_form['Break'] = 'False'                                                   
                         new_form["Check-in"] = 'False'
                         new_form["Form"] = 'False'
-                        self.write_to_json(jobs, "Other")
-                        hours = self.update_hours_tally(jobs, 1)
-                        new_form["Shed_Hours"].append({"Name": st.session_state['name'],
-                                                       "Date": f'{self.get_current_date()}',
-                                                       "Hours": hours[1],
-                                                       "OT": hours[0]})
+                        new_form["Date"] = ''
+                        
                         self.write_to_json(jobs, "Other")
                         st.experimental_rerun()
                         
@@ -1199,12 +1264,16 @@ class App:
 
                                             try:
                                                 if jobs[job]["Timesheets"] == []:
-                                                    new = {"Name": f"{st.session_state['name']}",
-                                                        "Date": f"{item2.strftime('%d/%m/%Y')}",
-                                                        "Check-in": f"{str(item3)}",
-                                                        "Check-out": "",
-                                                        "Total":"",
-                                                        "Job":f"{job}"}
+                                                    # new = {"Name": f"{st.session_state['name']}",
+                                                    #     "Date": f"{item2.strftime('%d/%m/%Y')}",
+                                                    #     "Check-in": f"{str(item3)}",
+                                                    #     "Check-out": "",
+                                                    #     "Total":"",
+                                                    #     "Job":f"{job}"}
+                                                    new = self.new_timesheet(st.session_state['name'],
+                                                                             f'{item2.strftime("%d/%m/%Y")}',
+                                                                             f"{str(item3)}",
+                                                                             job)
                                                     jobs[job]["Timesheets"].append(new) 
                                                     self.write_to_json(jobs, job)
                                                     test = False
