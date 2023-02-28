@@ -13,7 +13,7 @@ RUN git clone https://github.com/fregapple/Work-Sheets.git
 RUN pip install -r ./Work-Sheets/requirements.txt
 
 COPY ./.streamlit/secrets.toml /app/.streamlit/secrets.toml
-COPY ./apple-touch-icon.png ./app/apple-touch-icon.png
+COPY ./apple-touch-icon.png /app/apple-touch-icon.png
 EXPOSE 8501
 
 HEALTHCHECK CMD curl --fail http://localhost:8501/_stcore/HEALTHCHECK
